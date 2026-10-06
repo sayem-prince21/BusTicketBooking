@@ -1,0 +1,46 @@
+@host = http://localhost:5290
+
+### 1. Create a new bus
+
+# This automatically creates 40 seats:
+
+POST {{host}}/api/bus
+Content-Type: application/json
+
+{
+"busName": "Green Line",
+"busNumber": "DHK-1234"
+}
+
+### 2. Get all buses
+
+# Returns all buses along with their 40 seats
+
+GET {{host}}/api/bus
+Accept: application/json
+
+### 3. Get seats of a specific bus
+
+# Replace the busId below with the actual ID returned from Step 1
+
+GET {{host}}/api/bus/00000000-0000-0000-0000-000000000000/seats
+Accept: application/json
+
+### 4. Create another bus
+
+# This creates another bus with a new set of 40 seats
+
+POST {{host}}/api/bus
+Content-Type: application/json
+
+{
+"busName": "Hanif Enterprise",
+"busNumber": "DHK-5678"
+}
+
+### 5. Get all buses again
+
+# Verify that both buses are now available
+
+GET {{host}}/api/bus
+Accept: application/json
