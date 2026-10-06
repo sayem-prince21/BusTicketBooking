@@ -1,0 +1,37 @@
+@host = http://localhost:5290
+
+### 1. Create a ticket
+POST {{host}}/api/ticket
+Content-Type: application/json
+
+{
+  "passengerName": "John hunj",
+  "seatNumber": "12A",
+  "ticketPrice": 25.50
+}
+
+### 2. Get all tickets
+GET {{host}}/api/ticket
+Accept: application/json
+
+### 3. Get a ticket by id (replace the id with one from step 1)
+GET {{host}}/api/ticket/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### 4. Update a ticket (replace the id with one from step 1)
+PUT {{host}}/api/ticket/ddc3e5d8-3517-4ecf-ae84-3ad51db06ae5
+Content-Type: application/json
+
+{
+  "passengerName": "fcgvbhb Doe",
+  "seatNumber": "12B",
+  "ticketPrice": 30.00,
+  "seatAvailable": false
+}
+
+### 5. Delete a ticket (replace the id with one from step 1)
+DELETE {{host}}/api/ticket/00000000-0000-0000-0000-000000000000
+
+### 6. Verify deletion — should return 404
+GET {{host}}/api/ticket/00000000-0000-0000-0000-000000000000
+Accept: application/json
