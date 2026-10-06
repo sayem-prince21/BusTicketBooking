@@ -9,7 +9,7 @@ namespace BusTicketBooking.Controllers
     [Route("api/[controller]")]
     public class BusController : ControllerBase
     {
-        private static List<Bus> buses = new List<Bus>();
+        public static List<Bus> buses = new List<Bus>();
 
         [HttpPost]
         public IActionResult CreateBus(Bus bus)
@@ -42,6 +42,37 @@ namespace BusTicketBooking.Controllers
         public IActionResult GetBuses()
         {
             return Ok(buses);
+        }
+
+        [HttpPut("{id:guid}")]
+        public IActionResult UpdateBuses(Guid id, Bus updatedBus)
+        {
+            var bus = buses.FirstOrDefault(b => b.BusId == id);
+
+            if (bus == null)
+            {
+                return NotFound("Bus not found.");
+            }
+
+            bus.BusName = updatedBus.BusName;
+            bus.BusNumber = updatedBus.BusNumber;
+
+            return Ok(bus);
+        }
+
+        [HttpDelete("{id:guid}")]
+        public IActionResult DeleteBus(Guid id)
+        {
+            var bus = buses.FirstOrDefault(b => b.BusId == id);
+
+            if (bus == null)
+            {
+                return NotFound("Bus not found.");
+            }
+
+            buses.Remove(bus);
+
+            return Ok("Bus deleted successfully.");
         }
     }
 }

@@ -2,8 +2,6 @@
 
 ### 1. Create a new bus
 
-# This automatically creates 40 seats:
-
 POST {{host}}/api/bus
 Content-Type: application/json
 
@@ -14,33 +12,28 @@ Content-Type: application/json
 
 ### 2. Get all buses
 
-# Returns all buses along with their 40 seats
-
 GET {{host}}/api/bus
 Accept: application/json
 
-### 3. Get seats of a specific bus
+### 3. Get a bus by ID
 
-# Replace the busId below with the actual ID returned from Step 1
-
-GET {{host}}/api/bus/00000000-0000-0000-0000-000000000000/seats
+GET {{host}}/api/bus/f18bf6d2-a242-4110-85a0-8a45003e1e60
 Accept: application/json
 
-### 4. Create another bus
 
-# This creates another bus with a new set of 40 seats
+### 4. Update a bus
 
-POST {{host}}/api/bus
+# Replace the ID with an existing BusId
+
+PUT {{host}}/api/bus/a9d0b755-d194-46b7-96d4-5203e3437635
 Content-Type: application/json
 
 {
-"busName": "Hanif Enterprise",
-"busNumber": "DHK-5678"
+"busName": "Prince Express",
+"busNumber": "DHK-9999"
 }
 
-### 5. Get all buses again
+### 6. Delete a bus by BusId
 
-# Verify that both buses are now available
+DELETE {{host}}/api/bus/f18bf6d2-a242-4110-85a0-8a45003e1e60
 
-GET {{host}}/api/bus
-Accept: application/json
