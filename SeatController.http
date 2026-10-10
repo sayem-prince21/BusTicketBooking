@@ -1,0 +1,64 @@
+@host = http://localhost:5290
+
+# Replace this with an actual BusId
+@busId = b0044d94-92ee-4069-a237-36c25893a5d0
+
+
+### 1. Get all seats of a bus
+# Returns all 40 seats
+GET {{host}}/api/seat/bus/{{busId}}
+Accept: application/json
+
+
+### 2. Get a specific seat
+# Example: A1
+GET {{host}}/api/seat/bus/{{busId}}/A1
+Accept: application/json
+
+
+### 3. Book a seat
+# Books seat A1
+POST {{host}}/api/seat/bus/{{busId}}/A1/book
+Accept: application/json
+
+
+### 4. Check the seat after booking
+# A1 should now show IsAvailable: false
+GET {{host}}/api/seat/bus/{{busId}}/A1
+Accept: application/json
+
+
+### 5. Get all available seats
+# A1 should NOT appear here after booking
+GET {{host}}/api/seat/bus/{{busId}}/available
+Accept: application/json
+
+
+### 6. Get all booked seats
+# A1 should appear here after booking
+GET {{host}}/api/seat/bus/{{busId}}/booked
+Accept: application/json
+
+
+### 7. Try to book A1 again
+# Should return: Seat is already booked.
+POST {{host}}/api/seat/bus/{{busId}}/A1/book
+Accept: application/json
+
+
+### 8. Cancel A1 booking
+# A1 becomes available again
+PUT {{host}}/api/seat/bus/{{busId}}/A1/cancel
+Accept: application/json
+
+
+### 9. Check A1 after cancellation
+# A1 should now show IsAvailable: true
+GET {{host}}/api/seat/bus/{{busId}}/A1
+Accept: application/json
+
+
+### 10. Get available seats again
+# A1 should appear here again
+GET {{host}}/api/seat/bus/{{busId}}/available
+Accept: application/json

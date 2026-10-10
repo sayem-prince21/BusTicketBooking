@@ -1,0 +1,69 @@
+
+@host = http://localhost:5290
+
+# Replace with an actual BusId from your API
+@busId = 142268df-7da7-4ad5-b2ec-c7022a49d67a
+
+
+### 1. Book seat A1
+POST {{host}}/api/booking
+Content-Type: application/json
+
+{
+  "passengerName": "John",
+  "busId": "{{busId}}",
+  "seatNumber": "A1",
+  "totalPrice": 500
+}
+
+
+### 2. Book seat B1
+POST {{host}}/api/booking
+Content-Type: application/json
+
+{
+  "passengerName": "David",
+  "busId": "{{busId}}",
+  "seatNumber": "B1",
+  "totalPrice": 500
+}
+
+
+### 3. Book seat C1
+POST {{host}}/api/booking
+Content-Type: application/json
+
+{
+  "passengerName": "Smith",
+  "busId": "{{busId}}",
+  "seatNumber": "C1",
+  "totalPrice": 500
+}
+
+
+### 4. Try booking A1 again
+# Expected: 400 Bad Request
+POST {{host}}/api/booking
+Content-Type: application/json
+
+{
+  "passengerName": "Another Passenger",
+  "busId": "{{busId}}",
+  "seatNumber": "A1",
+  "totalPrice": 500
+}
+
+
+### 5. Check all seats of the bus
+GET {{host}}/api/seat/bus/{{busId}}
+Accept: application/json
+
+
+### 6. Check available seats
+GET {{host}}/api/seat/bus/{{busId}}/available
+Accept: application/json
+
+
+### 7. Check booked seats
+GET {{host}}/api/seat/bus/{{busId}}/booked
+Accept: application/json
