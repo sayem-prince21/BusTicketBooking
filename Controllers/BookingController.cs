@@ -69,5 +69,73 @@ namespace BusTicketBooking.Controllers
         {
             return Ok(bookings);
         }
+
+        [HttpGet("{id:guid}")]
+        public IActionResult GetBookingById(Guid id)
+        {
+             var booking = bookings.FirstOrDefault(
+                b => b.BookingId == id
+            );
+
+            if (booking == null)
+            {
+                return NotFound("Booking not found.");
+            }
+
+            return Ok(booking);
+        }
+
+        [HttpDelete("{id:guid}")]
+        public IActionResult CancelBookingById(Guid id)
+        {
+            // Find the booking
+            var booking = bookings.FirstOrDefault(
+                b => b.BookingId == id
+            );
+
+            if (booking == null)
+            {
+                return NotFound("Booking not found.");
+            }
+
+            // Prevent cancelling an already cancelled booking
+            if (booking.Status == "Cancelled")
+            {
+                return BadRequest("This booking is already cancelled.");
+            }
+
+            // Find the bus
+            var bus = BusController.buses.FirstOrDefault(
+                b => b.BusId == booking.BusId
+            );
+
+            if (bus == null)
+            {
+                return NotFound("Bus not found.");
+            }
+
+            // Find the seat
+            var seat = bus.Seats.FirstOrDefault(
+                s => s.SeatId == booking.SeatId
+            );
+
+            if (seat == null)
+            {
+                return NotFound("Seat not found.");
+            }
+
+            // Cancel the booking and release the seat
+            booking.Status = "Cancelled";
+            seat.IsAvailable = true;
+
+            return Ok(new
+            {
+                Message = "Booking cancelled successfully.",
+                BookingId = booking.BookingId,
+                SeatNumber = seat.SeatNumber,
+                BookingStatus = booking.Status,
+                IsSeatAvailable = seat.IsAvailable
+            });
+        }
     }
 }

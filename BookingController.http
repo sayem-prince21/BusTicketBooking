@@ -2,7 +2,7 @@
 @host = http://localhost:5290
 
 # Replace with an actual BusId from your API
-@busId = 142268df-7da7-4ad5-b2ec-c7022a49d67a
+@busId = 281bf6a9-586f-415d-84f0-8a56262c9a7b
 
 
 ### 1. Book seat A1
@@ -70,4 +70,15 @@ Accept: application/json
 
 ### Get all bookings
 GET {{host}}/api/booking
+Accept: application/json
+
+
+### Get a booking by ID
+@bookingId = 052c19c7-0615-468d-855c-e937fbfe04e0
+
+GET {{host}}/api/booking/{{bookingId}}
+Accept: application/json
+
+### Cancel a booking
+DELETE {{host}}/api/booking/{{bookingId}}
 Accept: application/json
