@@ -63,5 +63,11 @@ namespace BusTicketBooking.Controllers
                 IsAvailable = seat.IsAvailable
             });
         }
+
+        [HttpGet]
+        public IActionResult GetAllBooking()
+        {
+            return Ok(bookings);
+        }
     }
 }

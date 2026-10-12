@@ -67,3 +67,7 @@ Accept: application/json
 ### 7. Check booked seats
 GET {{host}}/api/seat/bus/{{busId}}/booked
 Accept: application/json
+
+### Get all bookings
+GET {{host}}/api/booking
+Accept: application/json
