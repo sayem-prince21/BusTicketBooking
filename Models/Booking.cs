@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace BusTicketBooking.Models
 {
     public class Booking
@@ -14,6 +15,7 @@ namespace BusTicketBooking.Models
         public Guid BusId { get; set; }
 
         public Guid SeatId { get; set; }
+
         public string SeatNumber { get; set; } = string.Empty;
 
         public DateTime BookingDate { get; set; } = DateTime.UtcNow;
@@ -21,5 +23,10 @@ namespace BusTicketBooking.Models
         public decimal TotalPrice { get; set; }
 
         public string Status { get; set; } = "Confirmed";
+
+        // Navigation properties
+        public Bus? Bus { get; set; }
+
+        public Seat? Seat { get; set; }
     }
 }

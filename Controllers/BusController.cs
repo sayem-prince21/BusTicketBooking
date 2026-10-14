@@ -1,7 +1,8 @@
-using System;
-using System.Collections.Generic;
+
+using BusTicketBooking.Data;
 using BusTicketBooking.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusTicketBooking.Controllers
 {
@@ -9,14 +10,20 @@ namespace BusTicketBooking.Controllers
     [Route("api/[controller]")]
     public class BusController : ControllerBase
     {
-        public static List<Bus> buses = new List<Bus>();
+        private readonly ApplicationDbContext _context;
 
+        public BusController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // POST: api/bus
         [HttpPost]
-        public IActionResult CreateBus(Bus bus)
+        public async Task<IActionResult> CreateBus(Bus bus)
         {
             bus.BusId = Guid.NewGuid();
-
             bus.TotalSeats = 40;
+            bus.Seats = new List<Seat>();
 
             for (int i = 0; i < 10; i++)
             {
@@ -27,27 +34,41 @@ namespace BusTicketBooking.Controllers
                     bus.Seats.Add(new Seat
                     {
                         SeatId = Guid.NewGuid(),
+                        BusId = bus.BusId,
                         SeatNumber = $"{row}{seatNumber}",
                         IsAvailable = true
                     });
                 }
             }
 
-            buses.Add(bus);
+            _context.Buses.Add(bus);
+            await _context.SaveChangesAsync();
 
-            return Ok(bus);
+            return CreatedAtAction(
+                nameof(GetBuses),
+                new { id = bus.BusId },
+                bus);
         }
 
+        // GET: api/bus
         [HttpGet]
-        public IActionResult GetBuses()
+        public async Task<IActionResult> GetBuses()
         {
+            var buses = await _context.Buses
+                .Include(b => b.Seats)
+                .AsNoTracking()
+                .ToListAsync();
+
             return Ok(buses);
         }
 
+        // PUT: api/bus/{id}
         [HttpPut("{id:guid}")]
-        public IActionResult UpdateBuses(Guid id, Bus updatedBus)
+        public async Task<IActionResult> UpdateBuses(
+            Guid id, Bus updatedBus)
         {
-            var bus = buses.FirstOrDefault(b => b.BusId == id);
+            var bus = await _context.Buses
+                .FirstOrDefaultAsync(b => b.BusId == id);
 
             if (bus == null)
             {
@@ -57,20 +78,26 @@ namespace BusTicketBooking.Controllers
             bus.BusName = updatedBus.BusName;
             bus.BusNumber = updatedBus.BusNumber;
 
+            await _context.SaveChangesAsync();
+
             return Ok(bus);
         }
 
+        // DELETE: api/bus/{id}
         [HttpDelete("{id:guid}")]
-        public IActionResult DeleteBus(Guid id)
+        public async Task<IActionResult> DeleteBus(Guid id)
         {
-            var bus = buses.FirstOrDefault(b => b.BusId == id);
+            var bus = await _context.Buses
+                .Include(b => b.Seats)
+                .FirstOrDefaultAsync(b => b.BusId == id);
 
             if (bus == null)
             {
                 return NotFound("Bus not found.");
             }
 
-            buses.Remove(bus);
+            _context.Buses.Remove(bus);
+            await _context.SaveChangesAsync();
 
             return Ok("Bus deleted successfully.");
         }

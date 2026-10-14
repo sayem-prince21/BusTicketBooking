@@ -1,7 +1,7 @@
 @host = http://localhost:5290
 
 # Replace this with an actual BusId
-@busId = b0044d94-92ee-4069-a237-36c25893a5d0
+@busId = 86d505d6-5e38-47fc-b83d-e357034aded5
 
 
 ### 1. Get all seats of a bus

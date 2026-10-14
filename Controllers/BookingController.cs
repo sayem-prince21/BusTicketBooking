@@ -1,9 +1,8 @@
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using BusTicketBooking.Data;
 using BusTicketBooking.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusTicketBooking.Controllers
 {
@@ -11,49 +10,66 @@ namespace BusTicketBooking.Controllers
     [Route("api/[controller]")]
     public class BookingController : ControllerBase
     {
-        private static List<Booking> bookings = new();
+        private readonly ApplicationDbContext _context;
 
-        // POST: /api/booking
-        [HttpPost]
-        public IActionResult CreateBooking(Booking booking)
+        public BookingController(ApplicationDbContext context)
         {
-            // Find the selected bus
-            var bus = BusController.buses
-                .FirstOrDefault(b => b.BusId == booking.BusId);
+            _context = context;
+        }
+
+        // POST: api/booking
+        [HttpPost]
+        public async Task<IActionResult> CreateBooking(Booking booking)
+        {
+            if (string.IsNullOrWhiteSpace(booking.PassengerName))
+            {
+                return BadRequest("Passenger name is required.");
+            }
+
+            if (booking.TotalPrice <= 0)
+            {
+                return BadRequest("Ticket price must be greater than zero.");
+            }
+
+            // Find the bus in the database
+            var bus = await _context.Buses
+                .FirstOrDefaultAsync(b => b.BusId == booking.BusId);
 
             if (bus == null)
             {
                 return NotFound("Bus not found.");
             }
 
-            // Find a seat by its number, such as A1 or B1
-            var seat = bus.Seats.FirstOrDefault(s =>
-                s.SeatNumber.Equals(
-                    booking.SeatNumber,
-                    StringComparison.OrdinalIgnoreCase
-                ));
+            // Find the selected seat belonging to this bus
+            var seat = await _context.Seats
+                .FirstOrDefaultAsync(s =>
+                    s.BusId == booking.BusId &&
+                    s.SeatNumber.ToUpper() ==
+                    booking.SeatNumber.ToUpper());
 
             if (seat == null)
             {
                 return NotFound("Seat not found in this bus.");
             }
 
-            // Check whether the seat is available
             if (!seat.IsAvailable)
             {
                 return BadRequest("This seat is already booked.");
             }
 
-            // Mark the seat as booked
+            // Reserve the seat
             seat.IsAvailable = false;
 
             // Create the booking
             booking.BookingId = Guid.NewGuid();
             booking.SeatId = seat.SeatId;
+            booking.SeatNumber = seat.SeatNumber;
             booking.BookingDate = DateTime.UtcNow;
             booking.Status = "Confirmed";
 
-            bookings.Add(booking);
+            _context.Bookings.Add(booking);
+
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
@@ -64,18 +80,24 @@ namespace BusTicketBooking.Controllers
             });
         }
 
+        // GET: api/booking
         [HttpGet]
-        public IActionResult GetAllBooking()
+        public async Task<IActionResult> GetAllBooking()
         {
+            var bookings = await _context.Bookings
+                .AsNoTracking()
+                .ToListAsync();
+
             return Ok(bookings);
         }
 
+        // GET: api/booking/{id}
         [HttpGet("{id:guid}")]
-        public IActionResult GetBookingById(Guid id)
+        public async Task<IActionResult> GetBookingById(Guid id)
         {
-             var booking = bookings.FirstOrDefault(
-                b => b.BookingId == id
-            );
+            var booking = await _context.Bookings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(b => b.BookingId == id);
 
             if (booking == null)
             {
@@ -85,48 +107,36 @@ namespace BusTicketBooking.Controllers
             return Ok(booking);
         }
 
+        // DELETE: api/booking/{id}
         [HttpDelete("{id:guid}")]
-        public IActionResult CancelBookingById(Guid id)
+        public async Task<IActionResult> CancelBookingById(Guid id)
         {
-            // Find the booking
-            var booking = bookings.FirstOrDefault(
-                b => b.BookingId == id
-            );
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingId == id);
 
             if (booking == null)
             {
                 return NotFound("Booking not found.");
             }
 
-            // Prevent cancelling an already cancelled booking
             if (booking.Status == "Cancelled")
             {
                 return BadRequest("This booking is already cancelled.");
             }
 
-            // Find the bus
-            var bus = BusController.buses.FirstOrDefault(
-                b => b.BusId == booking.BusId
-            );
-
-            if (bus == null)
-            {
-                return NotFound("Bus not found.");
-            }
-
-            // Find the seat
-            var seat = bus.Seats.FirstOrDefault(
-                s => s.SeatId == booking.SeatId
-            );
+            var seat = await _context.Seats
+                .FirstOrDefaultAsync(s => s.SeatId == booking.SeatId);
 
             if (seat == null)
             {
                 return NotFound("Seat not found.");
             }
 
-            // Cancel the booking and release the seat
+            // Cancel booking and release the seat
             booking.Status = "Cancelled";
             seat.IsAvailable = true;
+
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
