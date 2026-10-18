@@ -18,6 +18,7 @@ namespace BusTicketBooking.Controllers
         }
 
         // POST: api/booking
+
         [HttpPost]
         public async Task<IActionResult> CreateBooking(Booking booking)
         {
@@ -31,53 +32,85 @@ namespace BusTicketBooking.Controllers
                 return BadRequest("Ticket price must be greater than zero.");
             }
 
-            // Find the bus in the database
-            var bus = await _context.Buses
-                .FirstOrDefaultAsync(b => b.BusId == booking.BusId);
-
-            if (bus == null)
+            if (string.IsNullOrWhiteSpace(booking.SeatNumber))
             {
-                return NotFound("Bus not found.");
+                return BadRequest("Seat number is required.");
             }
 
-            // Find the selected seat belonging to this bus
-            var seat = await _context.Seats
-                .FirstOrDefaultAsync(s =>
-                    s.BusId == booking.BusId &&
-                    s.SeatNumber.ToUpper() ==
-                    booking.SeatNumber.ToUpper());
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
 
-            if (seat == null)
+            try
             {
-                return NotFound("Seat not found in this bus.");
+                // Check that the bus exists
+                var busExists = await _context.Buses
+                    .AnyAsync(b => b.BusId == booking.BusId);
+
+                if (!busExists)
+                {
+                    return NotFound("Bus not found.");
+                }
+
+                // Find the requested seat on this bus
+                var seat = await _context.Seats
+                    .FirstOrDefaultAsync(s =>
+                        s.BusId == booking.BusId &&
+                        s.SeatNumber.ToUpper() ==
+                        booking.SeatNumber.ToUpper());
+
+                if (seat == null)
+                {
+                    return NotFound("Seat not found in this bus.");
+                }
+
+                // Atomic reservation: only one request can change
+                // this seat from available to booked successfully.
+
+                var affectedRows = await _context.Database
+                    .ExecuteSqlInterpolatedAsync(
+                        $"UPDATE Seats SET IsAvailable = 0 WHERE SeatId = {seat.SeatId} AND IsAvailable = 1");
+
+
+                if (affectedRows != 1)
+                {
+                    await transaction.RollbackAsync();
+
+                    return Conflict("This seat has already been booked.");
+                }
+
+                // Keep the tracked entity consistent with the database
+                seat.IsAvailable = false;
+
+                // Create the booking
+                booking.BookingId = Guid.NewGuid();
+                booking.SeatId = seat.SeatId;
+                booking.SeatNumber = seat.SeatNumber;
+                booking.BookingDate = DateTime.UtcNow;
+                booking.Status = "Confirmed";
+
+                // Prevent client-supplied navigation objects being saved
+                booking.Bus = null;
+                booking.Seat = null;
+
+                _context.Bookings.Add(booking);
+
+                // Save the booking and commit the reservation together
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new
+                {
+                    Message = "Seat booked successfully.",
+                    Booking = booking,
+                    SeatNumber = seat.SeatNumber,
+                    IsAvailable = seat.IsAvailable
+                });
             }
-
-            if (!seat.IsAvailable)
+            catch
             {
-                return BadRequest("This seat is already booked.");
+                await transaction.RollbackAsync();
+                throw;
             }
-
-            // Reserve the seat
-            seat.IsAvailable = false;
-
-            // Create the booking
-            booking.BookingId = Guid.NewGuid();
-            booking.SeatId = seat.SeatId;
-            booking.SeatNumber = seat.SeatNumber;
-            booking.BookingDate = DateTime.UtcNow;
-            booking.Status = "Confirmed";
-
-            _context.Bookings.Add(booking);
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                Message = "Seat booked successfully.",
-                Booking = booking,
-                SeatNumber = seat.SeatNumber,
-                IsAvailable = seat.IsAvailable
-            });
         }
 
         // GET: api/booking

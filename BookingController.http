@@ -35,10 +35,11 @@ Content-Type: application/json
 {
   "passengerName": "Smith",
   "busId": "{{busId}}",
-  "seatNumber": "F1",
+  "seatNumber": "B1",
   "totalPrice": 500
 }
-
+###
+GET {{host}}/api/seat/bus/{{busId}}/A1
 
 ### 4. Try booking A1 again
 # Expected: 400 Bad Request

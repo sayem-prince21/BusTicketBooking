@@ -73,6 +73,20 @@ namespace BusTicketBooking.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime>("DepartureTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("TicketPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("TotalSeats")
                         .HasColumnType("int");
 

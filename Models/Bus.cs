@@ -13,5 +13,10 @@ namespace BusTicketBooking.Models
         public int TotalSeats {get; set;} = 40;
         public List<Seat> Seats { get; set; } = new();
 
+        public string Source { get; set; } = string.Empty;
+        public string Destination { get; set; } = string.Empty;
+        public DateTime DepartureTime { get; set; }
+        public decimal TicketPrice { get; set; }
+
     }
 }
