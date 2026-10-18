@@ -180,5 +180,29 @@ namespace BusTicketBooking.Controllers
                 IsSeatAvailable = seat.IsAvailable
             });
         }
+
+
+        [HttpGet("confirmed")]
+        public async Task<IActionResult> GetConfirmedBookings()
+        {
+            var bookings = await _context.Bookings
+                .AsNoTracking()
+                .Where(b => b.Status == "Confirmed")
+                .ToListAsync();
+
+            return Ok(bookings);
+        }
+
+        [HttpGet("cancelled")]
+        public async Task<IActionResult> GetCancelledBookings()
+        {
+            var bookings = await _context.Bookings
+                .AsNoTracking()
+                .Where(b => b.Status == "Cancelled")
+                .ToListAsync();
+
+            return Ok(bookings);
+        }
+
     }
 }

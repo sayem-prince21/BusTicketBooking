@@ -73,6 +73,14 @@ GET {{host}}/api/booking
 Accept: application/json
 
 
+### Get confirmed bookings
+GET {{host}}/api/booking/confirmed
+Accept: application/json
+
+### Get cancelled bookings
+GET {{host}}/api/booking/cancelled
+Accept: application/json
+
 ### Get a booking by ID
 @bookingId = e4cb6dd1-258d-4ead-86fa-6b14da6726b1
 
