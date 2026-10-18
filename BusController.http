@@ -10,6 +10,22 @@ Content-Type: application/json
 "busNumber": "DHK-1234"
 }
 
+### 
+POST {{host}}/api/bus
+Content-Type: application/json
+
+{
+  "busName": "Green Line",
+  "busNumber": "DHK-5678",
+  "source": "Dhaka",
+  "destination": "Chittagong",
+  "departureTime": "2026-10-20T08:00:00",
+  "ticketPrice": 800
+}
+
+### bus search
+GET {{host}}/api/bus/search?source=Dhaka&destination=Chittagong&date=2026-10-20
+
 ### 2. Get all buses
 
 GET {{host}}/api/bus

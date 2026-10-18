@@ -2,7 +2,7 @@
 @host = http://localhost:5290
 
 # Replace with an actual BusId from your API
-@busId = 86d505d6-5e38-47fc-b83d-e357034aded5
+@busId = 89145b06-5165-439f-8a46-82584e047fb5
 
 ### 1. Book seat A1
 POST {{host}}/api/booking
@@ -50,7 +50,7 @@ Content-Type: application/json
   "passengerName": "Another Passenger",
   "busId": "{{busId}}",
   "seatNumber": "A1",
-  "totalPrice": 500
+  "totalPrice": 800
 }
 
 
@@ -74,7 +74,7 @@ Accept: application/json
 
 
 ### Get a booking by ID
-@bookingId = 50ab4a9a-b30e-4d88-9a79-b1a0d7fe9b3a
+@bookingId = e4cb6dd1-258d-4ead-86fa-6b14da6726b1
 
 GET {{host}}/api/booking/{{bookingId}}
 Accept: application/json

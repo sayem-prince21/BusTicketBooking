@@ -17,7 +17,36 @@ namespace BusTicketBooking.Controllers
             _context = context;
         }
 
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchBuses(
+            [FromQuery] string source,
+            [FromQuery] string destination,
+            [FromQuery] DateTime date)
+        {
+            var buses = await _context.Buses
+                .Where(b =>
+                    b.Source.ToLower() == source.ToLower() &&
+                    b.Destination.ToLower() == destination.ToLower() &&
+                    b.DepartureTime.Date == date.Date)
+                .Select(b => new
+                {
+                    b.BusId,
+                    b.BusName,
+                    b.BusNumber,
+                    b.Source,
+                    b.Destination,
+                    b.DepartureTime,
+                    b.TicketPrice,
+                    AvailableSeats = b.Seats.Count(s => s.IsAvailable)
+                })
+                .ToListAsync();
+
+            return Ok(buses);
+        }
+
         // POST: api/bus
+
         [HttpPost]
         public async Task<IActionResult> CreateBus(Bus bus)
         {
@@ -44,11 +73,9 @@ namespace BusTicketBooking.Controllers
             _context.Buses.Add(bus);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetBuses),
-                new { id = bus.BusId },
-                bus);
+            return Ok(bus);
         }
+
 
         // GET: api/bus
         [HttpGet]
