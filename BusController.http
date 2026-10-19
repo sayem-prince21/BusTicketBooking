@@ -9,7 +9,18 @@ Content-Type: application/json
 "busName": "Green Line",
 "busNumber": "DHK-1234"
 }
+### Create a new bus with route, departure time and ticket price
+POST {{host}}/api/bus
+Content-Type: application/json
 
+{
+  "busName": "Prince Line",
+  "busNumber": "DHK-777",
+  "source": "Dhaka",
+  "destination": "Chittagong",
+  "departureTime": "2026-10-25T08:30:00",
+  "ticketPrice": 800
+}
 ### 
 POST {{host}}/api/bus
 Content-Type: application/json

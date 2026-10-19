@@ -3,6 +3,7 @@ using BusTicketBooking.Data;
 using BusTicketBooking.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using BusTicketBooking.DTOs;
 
 namespace BusTicketBooking.Controllers
 {
@@ -47,12 +48,22 @@ namespace BusTicketBooking.Controllers
 
         // POST: api/bus
 
+
         [HttpPost]
-        public async Task<IActionResult> CreateBus(Bus bus)
+        public async Task<IActionResult> CreateBus(CreateBusRequest request)
         {
-            bus.BusId = Guid.NewGuid();
-            bus.TotalSeats = 40;
-            bus.Seats = new List<Seat>();
+            var bus = new Bus
+            {
+                BusId = Guid.NewGuid(),
+                BusName = request.BusName,
+                BusNumber = request.BusNumber,
+                Source = request.Source,
+                Destination = request.Destination,
+                DepartureTime = request.DepartureTime,
+                TicketPrice = request.TicketPrice,
+                TotalSeats = 40,
+                Seats = new List<Seat>()
+            };
 
             for (int i = 0; i < 10; i++)
             {
@@ -75,6 +86,7 @@ namespace BusTicketBooking.Controllers
 
             return Ok(bus);
         }
+
 
 
         // GET: api/bus
