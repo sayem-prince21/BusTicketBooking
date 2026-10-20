@@ -89,3 +89,38 @@ Accept: application/json
 ### Cancel a booking
 DELETE {{host}}/api/booking/{{bookingId}}
 Accept: application/json
+
+### Get my bookings
+GET {{host}}/api/booking
+Authorization: Bearer {{token}}
+
+
+
+### Get my confirmed bookings
+GET {{host}}/api/booking/confirmed
+Authorization: Bearer {{token}}
+
+###
+
+### Get my cancelled bookings
+GET {{host}}/api/booking/cancelled
+Authorization: Bearer {{token}}
+
+
+
+### Test 1: Create booking without JWT
+POST {{host}}/api/booking
+Content-Type: application/json
+
+{
+  "passengerName": "Test Passenger",
+  "busId": "1636fc26-bb71-484f-87ac-06a82f043c79",
+  "seatNumber": "A2"
+}
+
+### Test 2: Get bookings without JWT
+GET {{host}}/api/booking
+
+### Test 3: Get my bookings with JWT
+GET {{host}}/api/booking
+Authorization: Bearer {{token}}

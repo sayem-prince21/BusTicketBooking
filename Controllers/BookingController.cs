@@ -144,12 +144,25 @@ namespace BusTicketBooking.Controllers
 
 
         // GET: api/booking
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllBooking()
         {
-            var bookings = await _context.Bookings
-                .AsNoTracking()
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            var bookingsQuery = _context.Bookings.AsNoTracking();
+
+            if (!isAdmin)
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                bookingsQuery = bookingsQuery.Where(b => b.UserId == userId);
+            }
+
+            var bookings = await bookingsQuery
                 .Select(b => new BookingResponseDto
                 {
                     BookingId = b.BookingId,
@@ -176,24 +189,36 @@ namespace BusTicketBooking.Controllers
         public async Task<IActionResult> GetBookingById(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var booking = await _context.Bookings
+            var isAdmin = User.IsInRole("Admin");
+            var bookingQuery = _context.Bookings
                 .AsNoTracking()
-                .Where(b => b.BookingId == id && b.UserId == userId)
-                            .Select(b => new BookingResponseDto
-                            {
-                                BookingId = b.BookingId,
-                                PassengerName = b.PassengerName,
-                                BusName = b.Bus != null ? b.Bus.BusName : "Unknown Bus",
-                                BusNumber = b.Bus != null ? b.Bus.BusNumber : "Unknown",
-                                Source = b.Bus != null ? b.Bus.Source : "Unknown",
-                                DepartureTime = b.Bus != null ? b.Bus.DepartureTime : default,
-                                Destination = b.Bus != null ? b.Bus.Destination : "Unknown",
-                                SeatNumber = b.SeatNumber,
-                                TotalPrice = b.TotalPrice,
-                                Status = b.Status
-                            })
-                            .FirstOrDefaultAsync();
+                .Where(b => b.BookingId == id);
+
+            if (!isAdmin)
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                bookingQuery = bookingQuery.Where(b => b.UserId == userId);
+            }
+
+            var booking = await bookingQuery
+                .Select(b => new BookingResponseDto
+                {
+                    BookingId = b.BookingId,
+                    PassengerName = b.PassengerName,
+                    BusName = b.Bus != null ? b.Bus.BusName : "Unknown Bus",
+                    BusNumber = b.Bus != null ? b.Bus.BusNumber : "Unknown",
+                    Source = b.Bus != null ? b.Bus.Source : "Unknown",
+                    DepartureTime = b.Bus != null ? b.Bus.DepartureTime : default,
+                    Destination = b.Bus != null ? b.Bus.Destination : "Unknown",
+                    SeatNumber = b.SeatNumber,
+                    TotalPrice = b.TotalPrice,
+                    Status = b.Status
+                })
+                .FirstOrDefaultAsync();
 
             if (booking == null)
             {
@@ -209,11 +234,19 @@ namespace BusTicketBooking.Controllers
         public async Task<IActionResult> CancelBookingById(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin && string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
 
             var booking = await _context.Bookings
-                .FirstOrDefaultAsync(b =>
-                    b.BookingId == id &&
-                    b.UserId == userId);
+                .FirstOrDefaultAsync(b => b.BookingId == id);
+
+            if (!isAdmin && booking?.UserId != userId)
+            {
+                booking = null;
+            }
 
             if (booking == null)
             {
@@ -251,12 +284,27 @@ namespace BusTicketBooking.Controllers
 
 
 
+        [Authorize]
         [HttpGet("confirmed")]
         public async Task<IActionResult> GetConfirmedBookings()
         {
-            var bookings = await _context.Bookings
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin && string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var bookingsQuery = _context.Bookings
                 .AsNoTracking()
-                .Where(b => b.Status == "Confirmed")
+                .Where(b => b.Status == "Confirmed");
+
+            if (!isAdmin)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.UserId == userId);
+            }
+
+            var bookings = await bookingsQuery
                 .Select(b => new BookingResponseDto
                 {
                     BookingId = b.BookingId,
@@ -277,12 +325,27 @@ namespace BusTicketBooking.Controllers
 
 
 
+        [Authorize]
         [HttpGet("cancelled")]
         public async Task<IActionResult> GetCancelledBookings()
         {
-            var bookings = await _context.Bookings
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin && string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var bookingsQuery = _context.Bookings
                 .AsNoTracking()
-                .Where(b => b.Status == "Cancelled")
+                .Where(b => b.Status == "Cancelled");
+
+            if (!isAdmin)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.UserId == userId);
+            }
+
+            var bookings = await bookingsQuery
                 .Select(b => new BookingResponseDto
                 {
                     BookingId = b.BookingId,

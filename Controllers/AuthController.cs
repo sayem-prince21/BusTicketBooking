@@ -105,6 +105,29 @@ namespace BusTicketBooking.Controllers
                 });
             }
 
+            var roleResult = await _userManager.AddToRoleAsync(
+                user,
+                "Customer");
+
+            if (!roleResult.Succeeded)
+            {
+                var deleteResult = await _userManager.DeleteAsync(user);
+                var errors = string.Join(
+                    "; ", roleResult.Errors.Select(e => e.Description));
+
+                if (!deleteResult.Succeeded)
+                {
+                    var cleanupErrors = string.Join(
+                        "; ", deleteResult.Errors.Select(e => e.Description));
+
+                    throw new InvalidOperationException(
+                        $"Could not assign the Customer role ({errors}) or remove the incomplete account ({cleanupErrors}).");
+                }
+
+                throw new InvalidOperationException(
+                    $"Could not assign the Customer role: {errors}");
+            }
+
             // Return account details without exposing the password.
             return Ok(new
             {
@@ -192,21 +215,32 @@ namespace BusTicketBooking.Controllers
                     statusCode: 500);
             }
 
+
             // Create claims identifying the authenticated user.
             var claims = new List<Claim>
             {
-                new Claim(
-                    ClaimTypes.NameIdentifier,
-                    user.Id),
+            new Claim(
+                ClaimTypes.NameIdentifier,
+                user.Id),
 
-                new Claim(
-                    ClaimTypes.Name,
-                    user.UserName ?? string.Empty),
+            new Claim(
+                ClaimTypes.Name,
+                user.UserName ?? string.Empty),
 
-                new Claim(
-                    ClaimTypes.Email,
-                    user.Email ?? string.Empty)
-            };
+            new Claim(
+                ClaimTypes.Email,
+                user.Email ?? string.Empty)
+             };
+
+            // Get all roles assigned to this user.
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            // Add each role to the JWT claims.
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
 
             // Set the token expiration time to one hour from now.
             var expiresAt = DateTime.UtcNow.AddHours(1);

@@ -87,6 +87,42 @@ builder.Services.AddSingleton<TicketService>();
 
 var app = builder.Build();
 
+var adminEmail = builder.Configuration["Admin:Email"];
+
+if (!string.IsNullOrWhiteSpace(adminEmail))
+{
+    await AdminSeeder.CreateAdminAsync(
+        app.Services,
+        adminEmail);
+}
+
+// Create application roles if they do not exist.
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roles = { "Admin", "Customer" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            var result = await roleManager.CreateAsync(
+                new IdentityRole(role));
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(
+                    "; ", result.Errors.Select(e => e.Description));
+
+                throw new InvalidOperationException(
+                    $"Could not create the {role} role: {errors}");
+            }
+        }
+    }
+}
+
 // Configure middleware in the correct order.
 app.UseHttpsRedirection();
 

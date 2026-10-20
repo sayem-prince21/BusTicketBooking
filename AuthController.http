@@ -7,9 +7,9 @@ Content-Type: application/json
 
 {
   "fullName": "Test User",
-  "email": "testuser@example.com",
-  "phoneNumber": "01712345678",
-  "password": "TestUser@123"
+  "email": "{{email}}",
+  "phoneNumber": "{{phoneNumber}}",
+  "password": "{{password}}"
 }
 
 
@@ -18,8 +18,8 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "testuser@example.com",
-  "password": "TestUser@123"
+  "email": "{{email}}",
+  "password": "{{password}}"
 }
 
 ### 2. Login using Phone Number
@@ -27,8 +27,8 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "phoneNumber": "01712345678",
-  "password": "TestUser@123"
+  "phoneNumber": "{{phoneNumber}}",
+  "password": "{{password}}"
 }
 
 
@@ -43,8 +43,8 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "testuser@example.com",
-  "password": "TestUser@123"
+  "email": "{{email}}",
+  "password": "{{password}}"
 }
 
 
@@ -73,3 +73,17 @@ DELETE {{host}}/api/booking/f1c37cda-92ae-4eb5-96fe-cc1f30e8b19a
 GET {{host}}/api/auth/me
 Authorization: Bearer {{token}}
 Accept: application/json
+
+
+### Login as Admin
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### Admin dashboard
+GET {{host}}/api/admin/dashboard
+Authorization: Bearer {{token}}
