@@ -47,6 +47,28 @@ Content-Type: application/json
   "password": "TestUser@123"
 }
 
+
+### 2. Create booking using JWT
+POST {{host}}/api/booking
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Test Passenger",
+  "busId": "1636fc26-bb71-484f-87ac-06a82f043c79",
+  "seatNumber": "E1"
+}
+
+
+### 3. Cancel your own booking
+DELETE {{host}}/api/booking/f1c37cda-92ae-4eb5-96fe-cc1f30e8b19a
+Authorization: Bearer {{token}}
+
+
+### 4. Try cancelling without a token
+DELETE {{host}}/api/booking/f1c37cda-92ae-4eb5-96fe-cc1f30e8b19a
+
+
 ### 3. Access profile using JWT token
 GET {{host}}/api/auth/me
 Authorization: Bearer {{token}}

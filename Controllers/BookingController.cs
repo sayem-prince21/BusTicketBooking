@@ -7,6 +7,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using BusTicketBooking.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace BusTicketBooking.Controllers
 {
@@ -23,11 +25,20 @@ namespace BusTicketBooking.Controllers
 
         // POST: api/booking
 
-
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateBooking(
             [FromBody] CreateBookingRequest request)
         {
+            //validation
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+
             if (string.IsNullOrWhiteSpace(request.PassengerName))
             {
                 return BadRequest("Passenger name is required.");
@@ -97,9 +108,11 @@ namespace BusTicketBooking.Controllers
                     SeatId = seat.SeatId,
                     SeatNumber = seat.SeatNumber,
                     BookingDate = DateTime.UtcNow,
-                    // TotalPrice = request.TotalPrice,
                     TotalPrice = bus.TicketPrice,
-                    Status = "Confirmed"
+                    Status = "Confirmed",
+
+                    // Associate this booking with the logged-in user.
+                    UserId = userId
                 };
 
                 _context.Bookings.Add(booking);
@@ -158,26 +171,29 @@ namespace BusTicketBooking.Controllers
 
         // GET: api/booking/{id}
         // GET: api/booking/{id}
+        [Authorize]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetBookingById(Guid id)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var booking = await _context.Bookings
                 .AsNoTracking()
-                .Where(b => b.BookingId == id)
-                .Select(b => new BookingResponseDto
-                {
-                    BookingId = b.BookingId,
-                    PassengerName = b.PassengerName,
-                    BusName = b.Bus != null ? b.Bus.BusName : "Unknown Bus",
-                    BusNumber = b.Bus != null ? b.Bus.BusNumber : "Unknown",
-                    Source = b.Bus != null ? b.Bus.Source : "Unknown",
-                    DepartureTime = b.Bus != null ? b.Bus.DepartureTime : default,
-                    Destination = b.Bus != null ? b.Bus.Destination : "Unknown",
-                    SeatNumber = b.SeatNumber,
-                    TotalPrice = b.TotalPrice,
-                    Status = b.Status
-                })
-                .FirstOrDefaultAsync();
+                .Where(b => b.BookingId == id && b.UserId == userId)
+                            .Select(b => new BookingResponseDto
+                            {
+                                BookingId = b.BookingId,
+                                PassengerName = b.PassengerName,
+                                BusName = b.Bus != null ? b.Bus.BusName : "Unknown Bus",
+                                BusNumber = b.Bus != null ? b.Bus.BusNumber : "Unknown",
+                                Source = b.Bus != null ? b.Bus.Source : "Unknown",
+                                DepartureTime = b.Bus != null ? b.Bus.DepartureTime : default,
+                                Destination = b.Bus != null ? b.Bus.Destination : "Unknown",
+                                SeatNumber = b.SeatNumber,
+                                TotalPrice = b.TotalPrice,
+                                Status = b.Status
+                            })
+                            .FirstOrDefaultAsync();
 
             if (booking == null)
             {
@@ -188,11 +204,16 @@ namespace BusTicketBooking.Controllers
         }
 
         // DELETE: api/booking/{id}
+        [Authorize]
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> CancelBookingById(Guid id)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var booking = await _context.Bookings
-                .FirstOrDefaultAsync(b => b.BookingId == id);
+                .FirstOrDefaultAsync(b =>
+                    b.BookingId == id &&
+                    b.UserId == userId);
 
             if (booking == null)
             {

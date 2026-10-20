@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
+using System;
+using BusTicketBooking.Models;
 
 namespace BusTicketBooking.Models
 {
@@ -24,7 +22,14 @@ namespace BusTicketBooking.Models
 
         public string Status { get; set; } = "Confirmed";
 
-        // Navigation properties
+        // Identity user who created this booking.
+        // Nullable initially to preserve existing bookings.
+        public string? UserId { get; set; }
+
+        // Navigation property for the associated user.
+        public ApplicationUser? User { get; set; }
+
+        // Existing navigation properties.
         public Bus? Bus { get; set; }
 
         public Seat? Seat { get; set; }

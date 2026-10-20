@@ -44,6 +44,14 @@ namespace BusTicketBooking.Data
                 .HasForeignKey(b => b.SeatId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // NEW: Booking-এর সঙ্গে ApplicationUser-এর relationship
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.User)
+                .WithMany()
+                .HasForeignKey(b => b.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Booking>()
                 .Property(b => b.TotalPrice)
                 .HasPrecision(10, 2);
