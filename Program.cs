@@ -1,14 +1,18 @@
+
 using BusTicketBooking.Services;
 using BusTicketBooking.Data;
-using Microsoft.EntityFrameworkCore;
 using BusTicketBooking.Models;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure ASP.NET Core Identity.
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
@@ -23,64 +27,77 @@ builder.Services
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Read JWT configuration.
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-
-//JWT service
-builder.Services.AddAuthentication(options =>
+// Fail early if JWT configuration is missing.
+if (string.IsNullOrWhiteSpace(jwtKey) ||
+    string.IsNullOrWhiteSpace(jwtIssuer) ||
+    string.IsNullOrWhiteSpace(jwtAudience))
 {
-    options.DefaultAuthenticateScheme =
-        JwtBearerDefaults.AuthenticationScheme;
+    throw new InvalidOperationException(
+        "JWT configuration is missing. Check your User Secrets.");
+}
 
-    options.DefaultChallengeScheme =
-        JwtBearerDefaults.AuthenticationScheme;
-})
-
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+// Configure JWT authentication.
+builder.Services
+    .AddAuthentication(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
+        options.DefaultAuthenticateScheme =
+            JwtBearerDefaults.AuthenticationScheme;
 
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        options.DefaultChallengeScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
 
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(
-                builder.Configuration["Jwt:Key"]!))
-    };
-});
+                ValidIssuer = jwtIssuer,
+                ValidAudience = jwtAudience,
+
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtKey))
+            };
+    });
+
+// Register authorization services.
 builder.Services.AddAuthorization();
 
-
-
+// Configure MySQL database.
 var connectionString = builder.Configuration
     .GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(connectionString!));
 
-
-
-
-
-// Add controller services
+// Register controllers.
 builder.Services.AddControllers();
 
-// In-memory ticket store
+// Register TicketService.
 builder.Services.AddSingleton<TicketService>();
 
 var app = builder.Build();
 
-//Middleware
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("/", () => "Hello World!");
+// Configure middleware in the correct order.
+app.UseHttpsRedirection();
 
 app.UseRouting();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+// Configure endpoints.
+app.MapGet("/", () => "Hello World!");
 
 app.MapControllers();
 

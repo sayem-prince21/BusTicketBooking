@@ -1,0 +1,53 @@
+
+@host = http://localhost:5290
+
+### Register a new user
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Test User",
+  "email": "testuser@example.com",
+  "phoneNumber": "01712345678",
+  "password": "TestUser@123"
+}
+
+
+### 1. Login using Email
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "TestUser@123"
+}
+
+### 2. Login using Phone Number
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "01712345678",
+  "password": "TestUser@123"
+}
+
+
+@host = http://localhost:5290
+
+### 1. Access token ছাড়া profile access
+GET {{host}}/api/auth/me
+Accept: application/json
+
+### 2. Login to receive JWT token
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "TestUser@123"
+}
+
+### 3. Access profile using JWT token
+GET {{host}}/api/auth/me
+Authorization: Bearer {{token}}
+Accept: application/json
