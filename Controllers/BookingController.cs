@@ -132,7 +132,7 @@ namespace BusTicketBooking.Controllers
                 return Ok(new
                 {
                     Message = "Seat booked successfully.",
-                    Booking = booking
+                    Booking = response
                 });
             }
             catch
@@ -239,17 +239,13 @@ namespace BusTicketBooking.Controllers
 
             if (!isAdmin && string.IsNullOrEmpty(userId))
             {
-                return Unauthorized();
+                return Unauthorized("User ID not found in token.");
             }
 
-            await using var transaction =
-                await _context.Database.BeginTransactionAsync();
-
+            // Find the booking before opening a transaction.
             var booking = await _context.Bookings
                 .FirstOrDefaultAsync(b => b.BookingId == id);
 
-            // Admin can cancel any booking.
-            // Customer can cancel only their own booking.
             if (booking == null ||
                 (!isAdmin && booking.UserId != userId))
             {
@@ -261,29 +257,43 @@ namespace BusTicketBooking.Controllers
                 return BadRequest("This booking is already cancelled.");
             }
 
-            var seat = await _context.Seats
-                .FirstOrDefaultAsync(s => s.SeatId == booking.SeatId);
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
 
-            if (seat == null)
+            try
             {
-                return NotFound("Seat not found.");
+                // Recheck the seat inside the transaction.
+                var seat = await _context.Seats
+                    .FirstOrDefaultAsync(s => s.SeatId == booking.SeatId);
+
+                if (seat == null)
+                {
+                    await transaction.RollbackAsync();
+                    return NotFound("Seat not found.");
+                }
+
+                booking.Status = "Cancelled";
+                seat.IsAvailable = true;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new
+                {
+                    Message = "Booking cancelled successfully.",
+                    BookingId = booking.BookingId,
+                    SeatNumber = seat.SeatNumber,
+                    BookingStatus = booking.Status,
+                    IsSeatAvailable = seat.IsAvailable
+                });
             }
-
-            booking.Status = "Cancelled";
-            seat.IsAvailable = true;
-
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return Ok(new
+            catch
             {
-                Message = "Booking cancelled successfully.",
-                BookingId = booking.BookingId,
-                SeatNumber = seat.SeatNumber,
-                BookingStatus = booking.Status,
-                IsSeatAvailable = seat.IsAvailable
-            });
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
 
 
 
