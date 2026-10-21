@@ -135,5 +135,88 @@ namespace BusTicketBooking.Controllers
             });
         }
 
+
+        // PUT: api/admin/customers/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCustomer(
+            string id,
+            [FromBody] UpdateCustomerDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound(new
+                {
+                    message = "Customer not found."
+                });
+            }
+
+            var isCustomer =
+                await _userManager.IsInRoleAsync(user, "Customer");
+
+            if (!isCustomer)
+            {
+                return NotFound(new
+                {
+                    message = "Customer not found."
+                });
+            }
+
+            // Check whether another account already uses this email
+            var existingUser =
+                await _userManager.FindByEmailAsync(dto.Email.Trim());
+
+            if (existingUser != null && existingUser.Id != user.Id)
+            {
+                return Conflict(new
+                {
+                    message = "This email is already registered."
+                });
+            }
+
+            var oldEmail = user.Email;
+            var newEmail = dto.Email.Trim();
+
+            user.FullName = dto.FullName.Trim();
+            user.PhoneNumber = string.IsNullOrWhiteSpace(dto.PhoneNumber)
+                ? null
+                : dto.PhoneNumber.Trim();
+
+            user.Email = newEmail;
+
+            // Keep username synchronized if it previously matched the email
+            if (string.Equals(
+                user.UserName,
+                oldEmail,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                user.UserName = newEmail;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    message = "Failed to update customer details.",
+                    errors = result.Errors.Select(e => e.Description)
+                });
+            }
+
+            return Ok(new
+            {
+                message = "Customer details updated successfully.",
+                customer = new
+                {
+                    user.Id,
+                    user.FullName,
+                    user.Email,
+                    user.PhoneNumber
+                }
+            });
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 @host = http://localhost:5290
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI1OWQ3YTJkLWM1M2MtNGI5MC1iYmRkLTNlN2YwY2IyZWJhZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwcmluY2VkZXZAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicHJpbmNlZGV2QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzkyNTc3NDA1LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.FjeX2wsk2eV_9gUhKMyx2yWvJEvEYElP9rVkDGRrY5k
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI1OWQ3YTJkLWM1M2MtNGI5MC1iYmRkLTNlN2YwY2IyZWJhZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwcmluY2VkZXZAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicHJpbmNlZGV2QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzkyNTg0Mzk2LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.2iLcnaYqDYyJhRUe6wpzCIavHHk77lXjB61jnbpbWeI
+
 ### Get all customers (Admin only)
 GET {{host}}/api/admin/customers
 Authorization: Bearer {{adminToken}}
@@ -7,6 +8,17 @@ Authorization: Bearer {{adminToken}}
 ### Get one customer (Admin only)
 GET {{host}}/api/admin/customers/REPLACE_WITH_CUSTOMER_ID
 Authorization: Bearer {{adminToken}}
+
+### Admin updates customer details
+PUT {{host}}/api/admin/customers/0ba251c3-eb4f-40f0-9c20-c643bb7a76d9
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Updated Customer",
+  "email": "updatedcustomer@example.com",
+  "phoneNumber": "+8801712345678"
+}
 
 ### Delete a customer (Admin only)
 DELETE {{host}}/api/admin/customers/dba93c6c-a760-4024-b517-659a4d8a3f99
