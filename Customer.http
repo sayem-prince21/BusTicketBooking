@@ -1,0 +1,169 @@
+
+@host = http://localhost:5290
+@busId = 1636fc26-bb71-484f-87ac-06a82f043c79
+@customer1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjBiYTI1MWMzLWViNGYtNDBmMC05YzIwLWM2NDNiYjdhNzZkOSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjU3ODIzMSwiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.47e5_wtaf227Y4e3aHEwC8QUnhx8zZm2PrnTbr9Jz3c
+@customer2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImRiYTkzYzZjLWE3NjAtNDAyNC1iNTE3LTY1OWE0ZDhhM2Y5OSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlcnByaW5jZTJAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoidGVzdHVzZXJwcmluY2UyQGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzkyNTc4MzU0LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.mPg4OQz5a8kuUN7_ATx59MD2Y44SFLKZYwo9mRqGk2Q
+
+### Register a new Customer
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Prince",
+  "email": "testuserprince@gmail.com",
+  "phoneNumber": "0123456789",
+  "password": "TestUser@123"
+}
+### Register a new Customer2
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Prince2",
+  "email": "testuserprince2@gmail.com",
+  "phoneNumber": "0123456089",
+  "password": "TestUser@123"
+}
+
+
+
+### 1. Login using Email
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuserprince2@gmail.com",
+  "password": "TestUser@123"
+}
+
+### 2. Login using Phone Number
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "01712345678",
+  "password": "TestUser@123"
+}
+
+
+### Customer 1 creates a booking
+POST {{host}}/api/booking
+Authorization: Bearer {{customer1Token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Customer One",
+  "busId": "{{busId}}",
+  "seatNumber": "D2"
+}
+
+### Customer 2 creates a booking
+POST {{host}}/api/booking
+Authorization: Bearer {{customer2Token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Customer Two",
+  "busId": "{{busId}}",
+  "seatNumber": "E3"
+}
+
+### Customer 1: Get confirmed bookings
+GET {{host}}/api/booking/confirmed
+Authorization: Bearer {{customer1Token}}
+Accept: application/json
+
+### Customer 2: Get confirmed bookings
+GET {{host}}/api/booking/confirmed
+Authorization: Bearer {{customer2Token}}
+Accept: application/json
+
+### Customer 1 cancels own booking
+DELETE {{host}}/api/booking/d3014e04-6a1e-485e-8248-fd56cfb9dd56
+Authorization: Bearer {{customer1Token}}
+
+### Customer 1 tries to cancel Customer 2 booking
+DELETE {{host}}/api/booking/7d5bf86a-cf57-4b76-a5c6-7b307f8e94b0
+Authorization: Bearer {{customer1Token}}
+
+
+### Concurrency Test: First request
+POST {{host}}/api/booking
+Authorization: Bearer {{customer1Token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Concurrency Test One",
+  "busId": "{{busId}}",
+  "seatNumber": "D4"
+}
+
+### Concurrency Test: Duplicate request
+POST {{host}}/api/booking
+Authorization: Bearer {{customer2Token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Concurrency Test Two",
+  "busId": "{{busId}}",
+  "seatNumber": "D4"
+}
+
+
+### Simultaneous booking - Customer 1
+POST {{host}}/api/booking
+Authorization: Bearer {{customer1Token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Concurrent Customer One",
+  "busId": "{{busId}}",
+  "seatNumber": "E4"
+}
+
+### Simultaneous booking - Customer 2
+POST {{host}}/api/booking
+Authorization: Bearer {{customer2Token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Concurrent Customer Two",
+  "busId": "{{busId}}",
+  "seatNumber": "E4"
+}
+
+### Get cancelled bookings
+GET {{host}}/api/booking/cancelled
+Authorization: Bearer {{customer1Token}}
+Accept: application/json
+
+//bookingId": "d3014e04-6a1e-485e-8248-fd56cfb9dd56",
+### Check the seat availability
+GET {{host}}/api/seat/bus/{{busId}}/D1
+Accept: application/json
+### Customer: Get my bookings
+GET {{host}}/api/booking
+Authorization: Bearer {{customer1Token}}
+Accept: application/json
+
+### Customer cancels D1 booking
+DELETE {{host}}/api/booking/30fed039-2db3-4699-bb30-9873d1bd30d7
+Authorization: Bearer {{customer1Token}}
+Accept: application/json
+
+
+### Rebook a cancelled seat
+POST {{host}}/api/booking
+Authorization: Bearer {{customer2Token}}
+Content-Type: application/json
+
+{
+  "passengerName": "Rebooking Test",
+  "busId": "{{busId}}",
+  "seatNumber": "D1"
+}
+
+### Customer 1 gets own booking
+GET {{host}}/api/booking/d3014e04-6a1e-485e-8248-fd56cfb9dd56
+Authorization: Bearer {{customer1Token}}
+Accept: application/json
