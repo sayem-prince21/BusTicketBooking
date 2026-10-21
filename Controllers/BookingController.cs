@@ -228,6 +228,7 @@ namespace BusTicketBooking.Controllers
             return Ok(booking);
         }
 
+
         // DELETE: api/booking/{id}
         [Authorize]
         [HttpDelete("{id:guid}")]
@@ -235,20 +236,22 @@ namespace BusTicketBooking.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole("Admin");
+
             if (!isAdmin && string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
             }
 
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
             var booking = await _context.Bookings
                 .FirstOrDefaultAsync(b => b.BookingId == id);
 
-            if (!isAdmin && booking?.UserId != userId)
-            {
-                booking = null;
-            }
-
-            if (booking == null)
+            // Admin can cancel any booking.
+            // Customer can cancel only their own booking.
+            if (booking == null ||
+                (!isAdmin && booking.UserId != userId))
             {
                 return NotFound("Booking not found.");
             }
@@ -266,11 +269,11 @@ namespace BusTicketBooking.Controllers
                 return NotFound("Seat not found.");
             }
 
-            // Cancel booking and release the seat
             booking.Status = "Cancelled";
             seat.IsAvailable = true;
 
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return Ok(new
             {

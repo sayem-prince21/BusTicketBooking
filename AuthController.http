@@ -6,10 +6,10 @@ POST {{host}}/api/auth/register
 Content-Type: application/json
 
 {
-  "fullName": "Test User",
-  "email": "{{email}}",
-  "phoneNumber": "{{phoneNumber}}",
-  "password": "{{password}}"
+  "fullName": "TestUser",
+  "email": "testuser@gmail.com",
+  "phoneNumber": "0174323456",
+  "password": "TestUser@123"
 }
 
 
@@ -18,8 +18,8 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "{{email}}",
-  "password": "{{password}}"
+  "email": "testuser@gmail.com",
+  "password": "TestUser@123"
 }
 
 ### 2. Login using Phone Number
@@ -27,8 +27,8 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "phoneNumber": "{{phoneNumber}}",
-  "password": "{{password}}"
+  "phoneNumber": "01712345678",
+  "password": "TestUser@123"
 }
 
 
@@ -43,8 +43,8 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "{{email}}",
-  "password": "{{password}}"
+  "email": "testuser@example.com",
+  "password": "TestUser@123"
 }
 
 
@@ -80,10 +80,25 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "{{adminEmail}}",
-  "password": "{{adminPassword}}"
+  "email": "princedev@gmail.com",
+  "password": "TestUser@123"
 }
 
 ### Admin dashboard
 GET {{host}}/api/admin/dashboard
-Authorization: Bearer {{token}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI1OWQ3YTJkLWM1M2MtNGI5MC1iYmRkLTNlN2YwY2IyZWJhZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwcmluY2VkZXZAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicHJpbmNlZGV2QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzkyNTIxMDc4LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.xc-HNb4hWkiMMomUE447cN5pbYcAofdxhIpVD_3VpNQ
+###
+GET {{host}}/api/booking
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI1OWQ3YTJkLWM1M2MtNGI5MC1iYmRkLTNlN2YwY2IyZWJhZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwcmluY2VkZXZAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicHJpbmNlZGV2QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzkyNTIxMDc4LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.xc-HNb4hWkiMMomUE447cN5pbYcAofdxhIpVD_3VpNQ
+
+### Cancel booking as Admin
+DELETE {{host}}/api/booking/a64de942-95a1-4678-8192-3b7c173bd231
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI1OWQ3YTJkLWM1M2MtNGI5MC1iYmRkLTNlN2YwY2IyZWJhZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwcmluY2VkZXZAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicHJpbmNlZGV2QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzkyNTIyODQxLCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.xetLbIJH8SD23RNGJHe_Holz1AMauqdpNUYM0apngT4
+
+###
+DELETE {{host}}/api/booking/YOUR_OWN_CONFIRMED_BOOKING_ID
+Authorization: Bearer YOUR_CUSTOMER_TOKEN
+
+###
+DELETE {{host}}/api/booking/OTHER_USERS_BOOKING_ID
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIwNzhlNGYyLTA3YWQtNDU0MS1hYjE5LTU0MDkwMWYxOTJkNSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlckBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0dXNlckBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjUyMzIwMSwiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.YVF7sn270BD7i4naFo4AWuUF49FJARHmbQ-ML86H1tU

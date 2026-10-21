@@ -1,0 +1,54 @@
+### Register Customer 1
+POST http://localhost:5290/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Customer One",
+  "userName": "customer1",
+  "email": "customer1@example.com",
+  "phoneNumber": "+8801712345678",
+  "password": "Customer@12345"
+}
+
+### Register Customer 2
+POST http://localhost:5290/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Customer two",
+  "userName": "customer2",
+  "email": "customer02@example.com",
+  "phoneNumber": "+8801712395778",
+  "password": "Customer@12345"
+}
+
+### Login Customer 1
+POST http://localhost:5290/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer1@example.com",
+  "password": "Customer@12345"
+}
+
+### Login Customer 2
+POST http://localhost:5290/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer2@example.com",
+  "password": "Customer@12345"
+}
+
+### Get Customer 1 confirmed bookings
+GET http://localhost:5290/api/booking/confirmed
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjM0MWEzMzI5LWVmZTYtNGZiMi1hYTJlLTYzNjE1YTA1OGEwZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJjdXN0b21lcjFAZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJjdXN0b21lcjFAZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjU1NzQ5NCwiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.ZHUUT0ymbiCk5ue5LqsDzMwalb-k4NLEYUyP_waX3bg
+Accept: application/json
+
+### Customer 1 cancels own booking
+DELETE http://localhost:5290/api/booking/CUSTOMER1_BOOKING_ID
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjM0MWEzMzI5LWVmZTYtNGZiMi1hYTJlLTYzNjE1YTA1OGEwZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJjdXN0b21lcjFAZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJjdXN0b21lcjFAZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjU1NzYzNiwiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.cRIxcAsMfevQFQMyNIdy4O3jP2eVHqhmDB6GjPt-kUw
+
+### Customer 1 tries to cancel Customer 2 booking
+DELETE http://localhost:5290/api/booking/CUSTOMER2_BOOKING_ID
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjM0MWEzMzI5LWVmZTYtNGZiMi1hYTJlLTYzNjE1YTA1OGEwZCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJjdXN0b21lcjFAZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJjdXN0b21lcjFAZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjU1NzYzNiwiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.cRIxcAsMfevQFQMyNIdy4O3jP2eVHqhmDB6GjPt-kUw
