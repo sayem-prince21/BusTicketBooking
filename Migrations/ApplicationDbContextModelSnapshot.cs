@@ -182,11 +182,12 @@ namespace BusTicketBooking.Migrations
 
                     b.Property<string>("SeatNumber")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("SeatId");
 
-                    b.HasIndex("BusId");
+                    b.HasIndex("BusId", "SeatNumber")
+                        .IsUnique();
 
                     b.ToTable("Seats");
                 });

@@ -32,7 +32,7 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "testuserprince2@gmail.com",
+  "email": "testuserprince@gmail.com",
   "password": "TestUser@123"
 }
 
@@ -167,3 +167,31 @@ Content-Type: application/json
 GET {{host}}/api/booking/d3014e04-6a1e-485e-8248-fd56cfb9dd56
 Authorization: Bearer {{customer1Token}}
 Accept: application/json
+
+
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImU4Mjg4MmUwLWZjODktNDkzMS1hNWNjLWE3MjY5ZWM2Y2I1OSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjU5MjY4OCwiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.5kHXbMrZNMpZ-E3TsmrVSXIh0ZWR25qfE0CWmkXknX0
+
+### Get my profile
+GET {{host}}/api/customer/profile
+Authorization: Bearer {{customerToken}}
+
+### Update my profile
+PUT {{host}}/api/customer/profile
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Prince1",
+  "email": "prince1@example.com",
+  "phoneNumber": "+8801712345678"
+}
+
+### Change my password
+PUT {{host}}/api/customer/profile/change-password
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "TestUser@1234!",
+  "newPassword": "TestUser@123"
+}

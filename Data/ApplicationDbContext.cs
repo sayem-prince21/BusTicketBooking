@@ -32,6 +32,12 @@ namespace BusTicketBooking.Data
                 .HasForeignKey(s => s.BusId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Prevent duplicate seat numbers within the same bus
+            modelBuilder.Entity<Seat>()
+                .HasIndex(s => new { s.BusId, s.SeatNumber })
+                .IsUnique();
+
+
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Bus)
                 .WithMany()
