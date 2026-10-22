@@ -33,6 +33,7 @@ Content-Type: application/json
 
 
 @host = http://localhost:5290
+@token = vhbnj
 
 ### 1. Access token ছাড়া profile access
 GET {{host}}/api/auth/me
@@ -115,3 +116,14 @@ Authorization: Bearer {{adminToken}}
 ### Get one customer (Admin only)
 GET {{host}}/api/admin/customers/REPLACE_WITH_CUSTOMER_ID
 Authorization: Bearer {{adminToken}}
+
+
+@customer1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjYxZWYyMDMyLWMzMGEtNDIyOC1iNzk5LWViNGNlMjhkOTgxNiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJuZXdAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoibmV3QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzkyNjc1MzEwLCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.8GTaolyEx4xC5r-onhNK0-PC5jXMy2Rd1lgOwgHMx-I",
+  "userId": "61ef2032-c30a-4228-b799-eb4ce28d9816
+### Customer must not access Admin Dashboard
+GET {{host}}/api/admin/dashboard
+Authorization: Bearer {{customer1Token}}
+
+### Customer must not access Admin Dashboard
+GET {{host}}/api/admin/dashboard
+Authorization: Bearer {{customer1Token}}

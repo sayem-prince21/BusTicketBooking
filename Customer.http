@@ -1,7 +1,7 @@
 
 @host = http://localhost:5290
 @busId = 1636fc26-bb71-484f-87ac-06a82f043c79
-@customer1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjBiYTI1MWMzLWViNGYtNDBmMC05YzIwLWM2NDNiYjdhNzZkOSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjU3ODIzMSwiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.47e5_wtaf227Y4e3aHEwC8QUnhx8zZm2PrnTbr9Jz3c
+@customer1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImU4Mjg4MmUwLWZjODktNDkzMS1hNWNjLWE3MjY5ZWM2Y2I1OSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJwcmluY2UxQGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicHJpbmNlMUBleGFtcGxlLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzkyNjA0NTIyLCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.8GNwBxFQilDtUU9R0dlqOST4VwmHTSrxLx6T4R_PSl8
 @customer2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImRiYTkzYzZjLWE3NjAtNDAyNC1iNTE3LTY1OWE0ZDhhM2Y5OSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlcnByaW5jZTJAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoidGVzdHVzZXJwcmluY2UyQGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzkyNTc4MzU0LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.mPg4OQz5a8kuUN7_ATx59MD2Y44SFLKZYwo9mRqGk2Q
 
 ### Register a new Customer
@@ -9,22 +9,11 @@ POST {{host}}/api/auth/register
 Content-Type: application/json
 
 {
-  "fullName": "Prince",
-  "email": "testuserprince@gmail.com",
-  "phoneNumber": "0123456789",
+  "fullName": "New",
+  "email": "new@gmail.com",
+  "phoneNumber": "01234522222",
   "password": "TestUser@123"
 }
-### Register a new Customer2
-POST {{host}}/api/auth/register
-Content-Type: application/json
-
-{
-  "fullName": "Prince2",
-  "email": "testuserprince2@gmail.com",
-  "phoneNumber": "0123456089",
-  "password": "TestUser@123"
-}
-
 
 
 ### 1. Login using Email
@@ -32,10 +21,17 @@ POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
+  "email": "new@gmail.com",
+  "password": "TestUser@123"
+}
+### Customer 1 Login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
   "email": "testuserprince@gmail.com",
   "password": "TestUser@123"
 }
-
 ### 2. Login using Phone Number
 POST {{host}}/api/auth/login
 Content-Type: application/json

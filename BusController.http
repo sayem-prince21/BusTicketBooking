@@ -1,4 +1,5 @@
 @host = http://localhost:5290
+@busId =bgfbvfvdcdcsdsvfv
 
 ### 1. Create a new bus
 
@@ -14,25 +15,35 @@ POST {{host}}/api/bus
 Content-Type: application/json
 
 {
-  "busName": "Prince Line",
+  "busName": "New Bus",
   "busNumber": "DHK-777",
   "source": "Dhaka",
   "destination": "Chittagong",
-  "departureTime": "2026-10-25T08:30:00",
+  "departureTime": "2026-10-27T08:30:00",
   "ticketPrice": 800
 }
-### 
-POST {{host}}/api/bus
-Content-Type: application/json
 
-{
-  "busName": "Green Line",
-  "busNumber": "DHK-5678",
-  "source": "Dhaka",
-  "destination": "Chittagong",
-  "departureTime": "2026-10-20T08:00:00",
-  "ticketPrice": 800
-}
+### Test 2A: Get all buses
+GET {{host}}/api/bus
+Accept: application/json
+
+### Test 2B: Get a specific bus by Id
+GET {{host}}/api/bus/1636fc26-bb71-484f-87ac-06a82f043c79
+Accept: application/json
+
+### Test 2C: Get all seats for a bus
+GET {{host}}/api/seat/bus/{{busId}}
+Accept: application/json
+
+### Test 2D: Get available seats
+GET {{host}}/api/seat/bus/{{busId}}/available
+Accept: application/json
+
+### Test 2E: Get booked seats
+GET {{host}}/api/seat/bus/{{busId}}/booked
+Accept: application/json
+
+
 
 ### bus search
 GET {{host}}/api/bus/search?source=Dhaka&destination=Chittagong&date=2026-10-20
@@ -63,4 +74,3 @@ Content-Type: application/json
 ### 6. Delete a bus by BusId
 
 DELETE {{host}}/api/bus/f18bf6d2-a242-4110-85a0-8a45003e1e60
-
