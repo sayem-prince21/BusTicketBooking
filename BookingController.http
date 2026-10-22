@@ -61,7 +61,29 @@ Authorization: Bearer {{token}}
 
 
 @customer2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6Ijg5ZjIyM2FlLTVjZjYtNDNlOC1hNzBlLWVmODk0NDBmMjdiNiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjYwNDg4NywiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.CtOBCbYn35LhnHNlti4fRdSkrUvR6UDQUARCORRce-A
+### Guest creates a booking without login
+POST http://localhost:5290/api/booking
+Content-Type: application/json
 
+{
+  "passengerName": "Guest Test",
+  "passengerPhone": "01712345678",
+  "passengerEmail": "guest@example.com",
+  "busId": "{{busId}}",
+  "seatNumber": "H1"
+}
+
+### Guest booking with ticket creation
+POST http://localhost:5290/api/booking
+Content-Type: application/json
+
+{
+  "passengerName": "Guest Test 3",
+  "passengerPhone": "01712345678",
+  "passengerEmail": "guest3@example.com",
+  "busId": "1636fc26-bb71-484f-87ac-06a82f043c79",
+  "seatNumber": "H2"
+}
 ### Customer 1 creates a booking
 POST {{host}}/api/booking
 Authorization: Bearer {{customer1Token}}

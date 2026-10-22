@@ -63,6 +63,12 @@ namespace BusTicketBooking.Data
                 .HasPrecision(10, 2);
 
             modelBuilder.Entity<Ticket>()
+                .HasOne(t => t.Booking)
+                .WithMany()
+                .HasForeignKey(t => t.BookingId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Ticket>()
                 .Property(t => t.TicketPrice)
                 .HasPrecision(10, 2);
         }

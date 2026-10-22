@@ -99,9 +99,19 @@ namespace BusTicketBooking.Migrations
                     b.Property<Guid>("BusId")
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("PassengerEmail")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("varchar(254)");
+
                     b.Property<string>("PassengerName")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<string>("PassengerPhone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<Guid>("SeatId")
                         .HasColumnType("char(36)");
@@ -198,6 +208,9 @@ namespace BusTicketBooking.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime>("IssuedAt")
                         .HasColumnType("datetime(6)");
 
@@ -217,6 +230,8 @@ namespace BusTicketBooking.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.HasKey("TicketId");
+
+                    b.HasIndex("BookingId");
 
                     b.ToTable("Tickets");
                 });
@@ -384,6 +399,17 @@ namespace BusTicketBooking.Migrations
                         .IsRequired();
 
                     b.Navigation("Bus");
+                });
+
+            modelBuilder.Entity("BusTicketBooking.Models.Ticket", b =>
+                {
+                    b.HasOne("BusTicketBooking.Models.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

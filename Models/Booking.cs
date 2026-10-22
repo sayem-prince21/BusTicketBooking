@@ -1,6 +1,7 @@
 
 using System;
 using BusTicketBooking.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace BusTicketBooking.Models
 {
@@ -9,6 +10,16 @@ namespace BusTicketBooking.Models
         public Guid BookingId { get; set; }
 
         public string PassengerName { get; set; } = string.Empty;
+        [Required]
+        [Phone]
+        [StringLength(20)]
+        public string PassengerPhone { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        [StringLength(254)]
+        public string PassengerEmail { get; set; } = string.Empty;
+
 
         public Guid BusId { get; set; }
 

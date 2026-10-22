@@ -25,23 +25,23 @@ namespace BusTicketBooking.Controllers
 
         // POST: api/booking
 
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateBooking(
-            [FromBody] CreateBookingRequest request)
+    [FromBody] CreateBookingRequest request)
         {
-            //validation
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("User ID not found in token.");
-            }
-
-
             if (string.IsNullOrWhiteSpace(request.PassengerName))
             {
                 return BadRequest("Passenger name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.PassengerPhone))
+            {
+                return BadRequest("Passenger phone is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.PassengerEmail))
+            {
+                return BadRequest("Passenger email is required.");
             }
 
             if (request.BusId == Guid.Empty)
@@ -54,10 +54,11 @@ namespace BusTicketBooking.Controllers
                 return BadRequest("Seat number is required.");
             }
 
-            // if (request.TotalPrice <= 0)
-            // {
-            //     return BadRequest("Ticket price must be greater than zero.");
-            // }
+            // Logged-in users are associated with their account.
+            // Guest users can book without an account.
+            var userId = User.Identity?.IsAuthenticated == true
+                ? User.FindFirstValue(ClaimTypes.NameIdentifier)
+                : null;
 
             await using var transaction =
                 await _context.Database.BeginTransactionAsync();
@@ -100,30 +101,62 @@ namespace BusTicketBooking.Controllers
 
                 seat.IsAvailable = false;
 
+                
                 var booking = new Booking
+
                 {
+
                     BookingId = Guid.NewGuid(),
                     PassengerName = request.PassengerName.Trim(),
+                    PassengerPhone = request.PassengerPhone.Trim(),
+                    PassengerEmail = request.PassengerEmail.Trim(),
                     BusId = request.BusId,
                     SeatId = seat.SeatId,
                     SeatNumber = seat.SeatNumber,
                     BookingDate = DateTime.UtcNow,
                     TotalPrice = bus.TicketPrice,
                     Status = "Confirmed",
-
-                    // Associate this booking with the logged-in user.
                     UserId = userId
                 };
 
                 _context.Bookings.Add(booking);
 
                 await _context.SaveChangesAsync();
+
+
+                var ticket = new Ticket
+                {
+                    TicketId = Guid.NewGuid(),
+                    BookingId = booking.BookingId,
+                    PassengerName = booking.PassengerName,
+                    SeatNumber = booking.SeatNumber,
+                    TicketPrice = booking.TotalPrice,
+                    IssuedAt = DateTime.UtcNow,
+                    SeatAvailable = false
+                };
+
+                _context.Tickets.Add(ticket);
+
+                await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
+
+
+
 
                 var response = new BookingResponseDto
                 {
                     BookingId = booking.BookingId,
                     PassengerName = booking.PassengerName,
+                    PassengerPhone = booking.PassengerPhone,
+                    PassengerEmail = booking.PassengerEmail,
+
+                    BusName = bus.BusName,
+                    BusNumber = bus.BusNumber,
+                    Source = bus.Source,
+                    Destination = bus.Destination,
+                    DepartureTime = bus.DepartureTime,
+
                     SeatNumber = booking.SeatNumber,
                     TotalPrice = booking.TotalPrice,
                     Status = booking.Status
@@ -134,6 +167,8 @@ namespace BusTicketBooking.Controllers
                     Message = "Seat booked successfully.",
                     Booking = response
                 });
+
+
             }
             catch
             {
@@ -141,6 +176,7 @@ namespace BusTicketBooking.Controllers
                 throw;
             }
         }
+
 
 
         // GET: api/booking
