@@ -38,10 +38,22 @@ export default function GuestBooking() {
   const { isAuthenticated } = useAuth()
 
   const busId = params.get('busId') || ''
-  const seatNumber = params.get('seat') || ''
-  const from = params.get('from') || ''
-  const to = params.get('to') || ''
-  const date = params.get('date') || ''
+  const rawSeat = params.get('seat') || ''
+  const seatNumber = rawSeat.includes('?') ? rawSeat.split('?')[0].trim() : rawSeat.trim()
+  let from = params.get('from') || ''
+  let to = params.get('to') || ''
+  let date = params.get('date') || ''
+
+  if (rawSeat.includes('?')) {
+    try {
+      const fallbackParams = new URLSearchParams(rawSeat.substring(rawSeat.indexOf('?') + 1))
+      if (!from) from = fallbackParams.get('from') || ''
+      if (!to) to = fallbackParams.get('to') || ''
+      if (!date) date = fallbackParams.get('date') || ''
+    } catch {
+      // ignore
+    }
+  }
 
   const [bus, setBus] = useState(null)
   const [loadState, setLoadState] = useState('loading')

@@ -124,8 +124,13 @@ export default function SeatSelection() {
         return
       }
 
-      const searchQuery = `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}`
-      navigate(`/booking/guest?busId=${encodeURIComponent(busId)}&seat=${encodeURIComponent(selectedSeat)}${searchQuery}`)
+      const nextParams = new URLSearchParams()
+      nextParams.set('busId', busId)
+      nextParams.set('seat', selectedSeat)
+      if (from) nextParams.set('from', from)
+      if (to) nextParams.set('to', to)
+      if (date) nextParams.set('date', date)
+      navigate(`/booking/guest?${nextParams.toString()}`)
     } catch (err) {
       setNotice({
         type: 'danger',
