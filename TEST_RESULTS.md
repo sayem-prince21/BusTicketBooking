@@ -151,3 +151,27 @@
 | 10 | Cancel malformed (non-GUID) ID | 404 | 404 — route `{id:guid}` does not match | PASS |
 | 11 | Customer1 cancels Customer2's booking `f3b09e05-5e87-4c4c-bb21-8a484d06fb3b` | rejected | 404 — "Booking not found." | PASS |
 | 12 | Customer2's booking unchanged after the attempt (DB) | Confirmed | Confirmed | PASS |
+
+## Booking Cancellation Authorization Test — cross-customer DELETE (Customer 1 → Customer 2's booking)
+
+- **Run at:** 2026-10-23 06:32 UTC
+- **API base URL:** http://localhost:5290
+- **Result:** PASS — API returned 404 and the target booking's DB state was unchanged
+- **Scope:** Authorization test only. Read-only DB queries (SELECT); no records created or modified, no source/config/migration changes.
+- **Auth:** All stored Customer 1 JWTs were expired, and `customer1@example.com` rejected the repo passwords (`TestUser@123`, `TestUser@1234!`, `NewPass@123` → 401). With operator approval, the existing account `new@gmail.com` (UserId `61ef2032-c30a-4228-b799-eb4ce28d9816`) was used as "Customer 1"; a fresh token was obtained via `POST /api/auth/login` (200).
+- **Target booking:** `7d5bf86a-cf57-4b76-a5c6-7b307f8e94b0` — seat D2, bus `1636fc26-bb71-484f-87ac-06a82f043c79`, seat `764b3b3d-7dcc-45f4-a6b9-e22dab268d7c`, owned by Customer 2 (`customer2@example.com`, UserId `4e990bac-3268-4dd3-bf23-064dc1d9c5cc`), verified via read-only DB join. No `Tickets` row exists for this booking.
+- **Pre-state (read-only SELECT):** `Bookings.Status = Confirmed`, `Seats.IsAvailable = 0`, no ticket row.
+
+| # | Test | Expected | Actual | Result |
+|---|------|----------|--------|--------|
+| 1 | Target booking belongs to Customer 2, not Customer 1 (DB join on UserId) | owner ≠ C1 | owner = customer2@example.com; C1 = new@gmail.com | PASS |
+| 2 | `DELETE /api/booking/7d5bf86a-…` with Customer 1 token | 404 Not Found | 404 — "Booking not found." | PASS |
+| 3 | Booking status unchanged (DB, before vs after) | Confirmed | Confirmed (row identical) | PASS |
+| 4 | Seat availability unchanged (DB) | IsAvailable = 0 | 0 (row identical) | PASS |
+| 5 | Ticket state unchanged (DB) | no ticket row | no ticket row (identical) | PASS |
+| 6 | Full pre/post snapshot comparison (booking + seat + ticket join) | identical | identical | PASS |
+
+Notes:
+
+- The stored `customer2@example.com` JWT from BookingController.http was no longer valid at test time (401 on `GET /api/booking/{id}`); ownership was instead verified directly in the database, which is authoritative.
+- 3 failed login attempts were recorded against `customer1@example.com` while looking for a valid token (below the 5-attempt lockout threshold; no lockout triggered). Its password appears to have been changed and is no longer the repo-documented `TestUser@123`.
