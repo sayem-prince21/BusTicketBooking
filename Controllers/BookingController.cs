@@ -328,17 +328,18 @@ namespace BusTicketBooking.Controllers
                 var ticket = await _context.Tickets
                     .FirstOrDefaultAsync(t => t.BookingId == booking.BookingId);
 
-                if (ticket == null)
-                {
-                    await transaction.RollbackAsync();
-                    return NotFound("Ticket not found for this booking.");
-                }
-
-                // Update booking, ticket, and seat together.
+                // Update the booking status.
                 booking.Status = "Cancelled";
-                ticket.Status = "Cancelled";
-                ticket.SeatAvailable = true;
+
+                // Make the seat available again.
                 seat.IsAvailable = true;
+
+                // Update the ticket only if it exists.
+                if (ticket != null)
+                {
+                    ticket.Status = "Cancelled";
+                    ticket.SeatAvailable = true;
+                }
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -347,9 +348,9 @@ namespace BusTicketBooking.Controllers
                 {
                     Message = "Booking cancelled successfully.",
                     BookingId = booking.BookingId,
-                    TicketId = ticket.TicketId,
+                    TicketId = ticket?.TicketId,
                     BookingStatus = booking.Status,
-                    TicketStatus = ticket.Status,
+                    TicketStatus = ticket?.Status,
                     SeatNumber = seat.SeatNumber,
                     IsSeatAvailable = seat.IsAvailable
                 });
