@@ -27,7 +27,7 @@ namespace BusTicketBooking.Controllers
 
         [HttpPost]
         public async Task<IActionResult> CreateBooking(
-    [FromBody] CreateBookingRequest request)
+        [FromBody] CreateBookingRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.PassengerName))
             {
@@ -101,7 +101,7 @@ namespace BusTicketBooking.Controllers
 
                 seat.IsAvailable = false;
 
-                
+
                 var booking = new Booking
 
                 {
@@ -165,7 +165,26 @@ namespace BusTicketBooking.Controllers
                 return Ok(new
                 {
                     Message = "Seat booked successfully.",
-                    Booking = response
+
+                    Booking = response,
+
+                    Ticket = new
+                    {
+                        TicketId = ticket.TicketId,
+                        BookingId = ticket.BookingId,
+                        PassengerName = ticket.PassengerName,
+                        PassengerPhone = booking.PassengerPhone,
+                        PassengerEmail = booking.PassengerEmail,
+                        BusName = bus.BusName,
+                        BusNumber = bus.BusNumber,
+                        Source = bus.Source,
+                        Destination = bus.Destination,
+                        DepartureTime = bus.DepartureTime,
+                        SeatNumber = ticket.SeatNumber,
+                        TicketPrice = ticket.TicketPrice,
+                        IssuedAt = ticket.IssuedAt,
+                        Status = booking.Status
+                    }
                 });
 
 
