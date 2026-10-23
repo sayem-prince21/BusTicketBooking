@@ -11,9 +11,10 @@ import { listBuses } from '../services/busService.js'
 import { getSeat, getSeats } from '../services/seatService.js'
 import { formatFare, formatJourneyDate, formatTime } from '../utils/format.js'
 
+const MAX_SEATS = 8
+
 // Page 2 (part 2): interactive seat selection.
-// Availability comes exclusively from GET /api/seat/bus/{busId}; the map is
-// revalidated with GET /api/seat/bus/{busId}/{seatNumber} before booking.
+// Supports multi-seat selection (up to 8 seats).
 export default function SeatSelection() {
   const { busId } = useParams()
   const [params] = useSearchParams()
@@ -25,7 +26,8 @@ export default function SeatSelection() {
 
   const [bus, setBus] = useState(null)
   const [seats, setSeats] = useState([])
-  const [selectedSeat, setSelectedSeat] = useState('')
+  const [selectedSeats, setSelectedSeats] = useState([])
+
   const [status, setStatus] = useState('loading') // loading | ready | error
   const [error, setError] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
@@ -100,25 +102,42 @@ export default function SeatSelection() {
   }
 
   const handleSelect = (seatNumber) => {
-    setSelectedSeat(seatNumber)
     setNotice(null)
+    if (selectedSeats.includes(seatNumber)) {
+      // সিলেক্ট করা থাকলে বাদ যাবে
+      setSelectedSeats((prev) => prev.filter((s) => s !== seatNumber))
+    } else {
+      if (selectedSeats.length >= MAX_SEATS) {
+        setNotice({
+          type: 'warning',
+          message: `You can select a maximum of ${MAX_SEATS} seats per reservation.`,
+        })
+        return
+      }
+      setSelectedSeats((prev) => [...prev, seatNumber].sort())
+    }
+  }
+
+  const handleRemoveSeat = (seatNumber) => {
+    setSelectedSeats((prev) => prev.filter((s) => s !== seatNumber))
   }
 
   const handleContinue = async () => {
-    if (!selectedSeat || validating) return
+    if (selectedSeats.length === 0 || validating) return
 
     setValidating(true)
     setNotice(null)
 
     try {
-      // Revalidate the exact seat against the API before booking.
-      const seat = await getSeat(busId, selectedSeat)
+      // সবগুলো নির্বাচিত সিট একসাথে চেক করা হচ্ছে
+      const checks = await Promise.all(selectedSeats.map((s) => getSeat(busId, s)))
+      const unavailable = checks.filter((seat) => !seat?.isAvailable).map((s) => s?.seatNumber || 'Selected seat')
 
-      if (!seat?.isAvailable) {
-        setSelectedSeat('')
+      if (unavailable.length > 0) {
+        setSelectedSeats((prev) => prev.filter((s) => !unavailable.includes(s)))
         setNotice({
           type: 'danger',
-          message: `Seat ${selectedSeat} was just taken. The seat map has been refreshed — please choose another seat.`,
+          message: `${unavailable.join(', ')} ${unavailable.length === 1 ? 'was' : 'were'} just taken. The seat map has been refreshed — please pick another seat.`,
         })
         await loadSeats(true)
         return
@@ -126,7 +145,8 @@ export default function SeatSelection() {
 
       const nextParams = new URLSearchParams()
       nextParams.set('busId', busId)
-      nextParams.set('seat', selectedSeat)
+      nextParams.set('seats', selectedSeats.join(','))
+      nextParams.set('seat', selectedSeats[0])
       if (from) nextParams.set('from', from)
       if (to) nextParams.set('to', to)
       if (date) nextParams.set('date', date)
@@ -167,7 +187,8 @@ export default function SeatSelection() {
   }
 
   const availableCount = seats.filter((seat) => seat.isAvailable).length
-  const fare = bus?.ticketPrice
+  const unitFare = bus?.ticketPrice || 0
+  const totalFare = unitFare * selectedSeats.length
   const journeyQuery = `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}`
 
   return (
@@ -175,7 +196,7 @@ export default function SeatSelection() {
       <div className="container">
         <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
           <div>
-            <h1 className="h4 mb-1">Select your seat</h1>
+            <h1 className="h4 mb-1">Select your seats</h1>
             <p className="text-muted small mb-0 d-flex flex-wrap align-items-center gap-3">
               <span className="d-inline-flex align-items-center gap-1">
                 <MapPin size={14} aria-hidden="true" />
@@ -222,10 +243,11 @@ export default function SeatSelection() {
 
                 <SeatMap
                   seats={seats}
-                  selectedSeat={selectedSeat}
+                  selectedSeats={selectedSeats}
                   onSelect={handleSelect}
                   onRefresh={handleRefresh}
                   refreshing={refreshing}
+                  maxSeats={MAX_SEATS}
                 />
               </div>
             </div>
@@ -234,43 +256,67 @@ export default function SeatSelection() {
           <div className="col-12 col-lg-5">
             <div className="sticky-lg-side">
               <BookingSummary
-                title="Selected seat"
+                title="Selected seats"
                 rows={[
                   { label: 'Bus', value: `${bus.busName} (${bus.busNumber})` },
                   { label: 'Route', value: `${bus.source} → ${bus.destination}` },
                   { label: 'Journey date', value: date ? formatJourneyDate(date) : '—' },
                   { label: 'Departure', value: formatTime(bus.departureTime) },
                   {
-                    label: 'Seat',
-                    value: selectedSeat ? (
-                      <span className="badge text-bg-primary">{selectedSeat}</span>
+                    label: `Selected seats (${selectedSeats.length}/${MAX_SEATS})`,
+                    value: selectedSeats.length > 0 ? (
+                      <div className="d-flex flex-wrap gap-1 justify-content-end">
+                        {selectedSeats.map((sn) => (
+                          <span key={sn} className="badge text-bg-primary d-inline-flex align-items-center gap-1">
+                            {sn}
+                            <button
+                              type="button"
+                              className="btn-close btn-close-white p-0"
+                              style={{ width: '0.55rem', height: '0.55rem' }}
+                              aria-label={`Remove seat ${sn}`}
+                              onClick={() => handleRemoveSeat(sn)}
+                            />
+                          </span>
+                        ))}
+                      </div>
                     ) : (
                       <span className="text-muted">None selected</span>
                     ),
-                    emphasize: Boolean(selectedSeat),
+                    emphasize: selectedSeats.length > 0,
+                  },
+                  {
+                    label: 'Fare per seat',
+                    value: formatFare(unitFare),
                   },
                 ]}
-                total={{ label: 'Total fare', value: formatFare(fare) }}
-                footer="One seat is booked per request — the booking API accepts a single seat number. Repeat the flow to book additional seats."
+                total={{
+                  label: `Total fare (${selectedSeats.length} seat${selectedSeats.length === 1 ? '' : 's'})`,
+                  value: formatFare(totalFare),
+                }}
+                footer={`You can select and book up to ${MAX_SEATS} seats in a single reservation.`}
               >
                 <div className="d-grid gap-2 mt-3">
                   <button
                     type="button"
                     className="btn btb-btn-brand btb-btn-lg"
-                    disabled={!selectedSeat || validating}
+                    disabled={selectedSeats.length === 0 || validating}
                     onClick={handleContinue}
                   >
                     <Armchair size={17} className="me-2" aria-hidden="true" />
-                    {validating ? 'Checking availability…' : 'Continue to Booking'}
+                    {validating
+                      ? 'Checking availability…'
+                      : selectedSeats.length > 0
+                        ? `Continue to Booking (${selectedSeats.length} Seat${selectedSeats.length > 1 ? 's' : ''})`
+                        : 'Select seats to continue'}
                   </button>
                   <Link to="/" className="btn btn-link">
                     Cancel and go back
                   </Link>
                 </div>
 
-                {!selectedSeat && (
+                {selectedSeats.length === 0 && (
                   <p className="small text-muted mt-2 mb-0 text-center">
-                    Choose an available seat to continue.
+                    Choose up to {MAX_SEATS} available seats on the seat map.
                   </p>
                 )}
               </BookingSummary>

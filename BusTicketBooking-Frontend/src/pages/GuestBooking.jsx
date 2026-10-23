@@ -26,27 +26,35 @@ function rememberTicketId(bookingId, ticketId) {
     map[bookingId] = ticketId
     sessionStorage.setItem(TICKET_IDS_KEY, JSON.stringify(map))
   } catch {
-    // Storage unavailable — the confirmation page will show the API-limited state.
+    // Storage unavailable
   }
 }
 
-// Page 3: guest booking (no login required). Submits the real request to
-// POST /api/booking with the exact DTO fields the backend expects.
+// Page 3: guest booking (no login required).
+// Supports multi-seat reservation (up to 8 seats).
 export default function GuestBooking() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
 
   const busId = params.get('busId') || ''
-  const rawSeat = params.get('seat') || ''
-  const seatNumber = rawSeat.includes('?') ? rawSeat.split('?')[0].trim() : rawSeat.trim()
+  const rawSeatsParam = params.get('seats') || params.get('seat') || ''
+  
+  // Parse clean list of seats
+  const seatList = rawSeatsParam
+    .split(',')
+    .map((s) => (s.includes('?') ? s.split('?')[0].trim() : s.trim()))
+    .filter(Boolean)
+
+  const seatNumberStr = seatList.join(', ')
+
   let from = params.get('from') || ''
   let to = params.get('to') || ''
   let date = params.get('date') || ''
 
-  if (rawSeat.includes('?')) {
+  if (rawSeatsParam.includes('?')) {
     try {
-      const fallbackParams = new URLSearchParams(rawSeat.substring(rawSeat.indexOf('?') + 1))
+      const fallbackParams = new URLSearchParams(rawSeatsParam.substring(rawSeatsParam.indexOf('?') + 1))
       if (!from) from = fallbackParams.get('from') || ''
       if (!to) to = fallbackParams.get('to') || ''
       if (!date) date = fallbackParams.get('date') || ''
@@ -67,7 +75,7 @@ export default function GuestBooking() {
   const submittingRef = useRef(false)
 
   useEffect(() => {
-    if (!busId || !seatNumber) return undefined
+    if (!busId || seatList.length === 0) return undefined
 
     let cancelled = false
 
@@ -92,7 +100,7 @@ export default function GuestBooking() {
     return () => {
       cancelled = true
     }
-  }, [busId, seatNumber])
+  }, [busId, seatList.length])
 
   const setField = (name, value) => {
     setForm((current) => ({ ...current, [name]: value }))
@@ -133,19 +141,20 @@ export default function GuestBooking() {
   }
 
   const handleConfirm = async () => {
-    // Guard against duplicate submissions (button state + ref).
     if (submittingRef.current) return
     submittingRef.current = true
     setSubmitting(true)
     setSubmitError(null)
 
     try {
-      // Revalidate seat availability immediately before submitting.
-      const seat = await getSeat(busId, seatNumber)
-      if (!seat?.isAvailable) {
+      // Revalidate all selected seats immediately before submitting.
+      const checks = await Promise.all(seatList.map((s) => getSeat(busId, s)))
+      const unavailable = checks.filter((seat) => !seat?.isAvailable).map((s) => s?.seatNumber || 'Seat')
+
+      if (unavailable.length > 0) {
         setShowConfirm(false)
         setSubmitError(
-          `Seat ${seatNumber} has already been booked by someone else. Please go back and choose another seat.`,
+          `Seat(s) ${unavailable.join(', ')} were already booked by someone else. Please go back and choose available seats.`,
         )
         return
       }
@@ -155,7 +164,8 @@ export default function GuestBooking() {
         passengerPhone: form.phone.trim(),
         passengerEmail: form.email.trim(),
         busId,
-        seatNumber,
+        seatNumber: seatNumberStr,
+        seats: seatList,
       })
 
       const booking = data.booking
@@ -163,7 +173,7 @@ export default function GuestBooking() {
 
       rememberTicketId(booking?.bookingId, ticket?.ticketId)
 
-      // Persist the real API response for the confirmation page.
+      // Persist booking details for confirmation page
       sessionStorage.setItem(
         'btb.lastBooking',
         JSON.stringify({
@@ -171,6 +181,7 @@ export default function GuestBooking() {
           message: data.message,
           booking,
           ticket,
+          seats: seatList,
           journey: {
             from: from || booking?.source,
             to: to || booking?.destination,
@@ -194,9 +205,8 @@ export default function GuestBooking() {
       setShowConfirm(false)
 
       if (isConflict(error)) {
-        // 409 = seat already booked (plain-text body from the backend).
         setSubmitError(
-          `${getErrorMessage(error)} Go back to the seat map to pick a different seat.`,
+          `${getErrorMessage(error)} Go back to the seat map to pick different seats.`,
         )
       } else {
         setSubmitError(getErrorMessage(error))
@@ -208,12 +218,16 @@ export default function GuestBooking() {
   }
 
   const handleBack = () => {
-    const query = new URLSearchParams({ from, to, date }).toString()
+    const query = new URLSearchParams({
+      from,
+      to,
+      date,
+      seats: seatList.join(','),
+    }).toString()
     navigate(`/seats/${busId}?${query}`)
   }
 
-  // Missing query parameters are handled during render (no effect needed).
-  const missingParams = !busId || !seatNumber
+  const missingParams = !busId || seatList.length === 0
 
   if (missingParams || loadState === 'error') {
     return (
@@ -223,7 +237,7 @@ export default function GuestBooking() {
             title="Booking unavailable"
             message={
               missingParams
-                ? 'Missing bus or seat information. Please start again from the seat map.'
+                ? 'Missing bus or seat selection. Please start again from the seat map.'
                 : loadError
             }
           />
@@ -245,17 +259,18 @@ export default function GuestBooking() {
     )
   }
 
-  const fare = bus.ticketPrice
+  const unitFare = bus.ticketPrice || 0
+  const totalFare = unitFare * seatList.length
 
   return (
     <div className="section py-4 py-lg-5">
       <div className="container">
         <div className="mb-4">
-          <h1 className="h4 mb-1">Guest booking</h1>
+          <h1 className="h4 mb-1">Passenger & Booking Details</h1>
           <p className="text-muted small mb-0">
             {isAuthenticated
-              ? 'You are signed in, so this booking will be linked to your account.'
-              : 'No account needed — your booking details are sent straight to the API.'}
+              ? `You are signed in; this reservation (${seatList.length} seat${seatList.length > 1 ? 's' : ''}) will be linked to your account.`
+              : `Booking ${seatList.length} seat${seatList.length > 1 ? 's' : ''}. No account required — your details are recorded directly with the operator.`}
           </p>
         </div>
 
@@ -269,7 +284,10 @@ export default function GuestBooking() {
           <div className="col-12 col-lg-7">
             <div className="card border-0 shadow-sm">
               <div className="card-body p-4">
-                <h2 className="h5 mb-4">Passenger details</h2>
+                <h2 className="h5 mb-3">Primary passenger details</h2>
+                <p className="small text-muted mb-4">
+                  Tickets for all {seatList.length} seat{seatList.length > 1 ? 's' : ''} will be issued under these contact details.
+                </p>
 
                 <form onSubmit={handleSubmit} noValidate>
                   <div className="mb-3">
@@ -330,14 +348,14 @@ export default function GuestBooking() {
                   <div className="alert alert-light border mt-4 mb-0 d-flex gap-2">
                     <ShieldCheck size={18} className="text-primary mt-1 flex-shrink-0" aria-hidden="true" />
                     <span className="small text-muted">
-                      These details are sent to <code>POST /api/booking</code> only.
-                      No payment is processed by this application.
+                      Reserving {seatList.length} seat{seatList.length > 1 ? 's' : ''} ({seatNumberStr}).
+                      Seat availability is guaranteed upon confirmation.
                     </span>
                   </div>
 
                   <div className="d-flex flex-wrap gap-2 mt-4">
                     <button type="submit" className="btn btb-btn-brand" disabled={submitting}>
-                      {submitting ? 'Processing…' : 'Confirm Booking'}
+                      {submitting ? 'Processing…' : `Confirm Booking (${formatFare(totalFare)})`}
                     </button>
                     <button type="button" className="btn btn-outline-secondary" onClick={handleBack}>
                       <ArrowLeft size={15} className="me-1" aria-hidden="true" />
@@ -357,15 +375,27 @@ export default function GuestBooking() {
                 { label: 'Route', value: `${bus.source} → ${bus.destination}` },
                 { label: 'Journey date', value: date ? formatJourneyDate(date) : '—' },
                 { label: 'Departure', value: formatTime(bus.departureTime) },
-                { label: 'Seat number', value: seatNumber, emphasize: true },
+                {
+                  label: `Seats (${seatList.length})`,
+                  value: (
+                    <div className="d-flex flex-wrap gap-1 justify-content-end">
+                      {seatList.map((sn) => (
+                        <span key={sn} className="badge text-bg-primary">
+                          {sn}
+                        </span>
+                      ))}
+                    </div>
+                  ),
+                  emphasize: true,
+                },
                 { label: 'Passenger', value: form.fullName || '—' },
                 { label: 'Phone', value: form.phone || '—' },
                 { label: 'Email', value: form.email || '—' },
-                { label: 'Fare', value: formatFare(fare) },
-                { label: 'Booking fee', value: formatFare(0) },
+                { label: 'Fare per seat', value: formatFare(unitFare) },
+                { label: 'Seats count', value: `${seatList.length} seat${seatList.length > 1 ? 's' : ''}` },
               ]}
-              total={{ label: 'Total amount', value: formatFare(fare) }}
-              footer="The total matches the bus fare returned by the API; this application adds no fees."
+              total={{ label: 'Total amount', value: formatFare(totalFare) }}
+              footer="Total amount is calculated from the unit fare per seat times the number of booked seats."
             />
           </div>
         </div>
@@ -373,7 +403,7 @@ export default function GuestBooking() {
 
       <Modal
         show={showConfirm}
-        title="Confirm your booking"
+        title="Confirm your reservation"
         onClose={() => !submitting && setShowConfirm(false)}
         footer={
           <>
@@ -394,10 +424,10 @@ export default function GuestBooking() {
               {submitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
-                  Booking…
+                  Booking {seatList.length} seats…
                 </>
               ) : (
-                'Yes, confirm booking'
+                `Confirm ${seatList.length} seat${seatList.length > 1 ? 's' : ''}`
               )}
             </button>
           </>
@@ -406,8 +436,7 @@ export default function GuestBooking() {
         <div className="alert alert-warning d-flex gap-2" role="alert">
           <AlertTriangle size={18} className="mt-1 flex-shrink-0" aria-hidden="true" />
           <span>
-            Seat <strong>{seatNumber}</strong> on <strong>{bus.busName}</strong> (
-            {bus.busNumber}) for <strong>{formatFare(fare)}</strong>.
+            Reserving <strong>{seatList.length}</strong> seat{seatList.length > 1 ? 's' : ''} (<strong>{seatNumberStr}</strong>) on <strong>{bus.busName}</strong> for <strong>{formatFare(totalFare)}</strong>.
           </span>
         </div>
 
@@ -427,15 +456,13 @@ export default function GuestBooking() {
           <li className="mb-1">
             <strong>Email:</strong> {form.email}
           </li>
+          <li className="mb-1">
+            <strong>Seats:</strong> {seatNumberStr}
+          </li>
           <li>
-            <strong>Total:</strong> {formatFare(fare)}
+            <strong>Total:</strong> {formatFare(totalFare)}
           </li>
         </ul>
-
-        <p className="small text-muted mt-3 mb-0">
-          The seat is re-checked with the API at submission time. You will see
-          the real booking and ticket IDs returned by the server.
-        </p>
       </Modal>
     </div>
   )

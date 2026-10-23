@@ -133,7 +133,13 @@ export default function BookingConfirmation() {
                           ? formatTime(record.bus.departureTime)
                           : '—',
                     },
-                    { label: 'Seat number', value: booking.seatNumber || '—', emphasize: true },
+                    {
+                      label: (record.seats?.length > 1 || booking.seatCount > 1)
+                        ? `Booked seats (${record.seats?.length || booking.seatCount})`
+                        : 'Seat number',
+                      value: booking.seatNumber || '—',
+                      emphasize: true,
+                    },
                     { label: 'Issued at', value: ticket.issuedAt ? formatDateTime(ticket.issuedAt) : '—' },
                   ]}
                   total={{

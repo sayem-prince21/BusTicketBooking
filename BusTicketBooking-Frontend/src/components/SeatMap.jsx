@@ -22,22 +22,46 @@ function groupRows(seats) {
 
 // Interactive seat map driven entirely by GET /api/seat/bus/{busId}:
 // booked seats are disabled so unavailable seats can never be selected.
-export default function SeatMap({ seats, selectedSeat, onSelect, onRefresh, refreshing }) {
+export default function SeatMap({
+  seats,
+  selectedSeats = [],
+  selectedSeat,
+  onSelect,
+  onRefresh,
+  refreshing,
+  maxSeats = 8,
+}) {
   const rows = groupRows(seats)
-
+  const activeSeats = Array.isArray(selectedSeats) && selectedSeats.length > 0
+    ? selectedSeats
+    : selectedSeat
+      ? [selectedSeat]
+      : []
   return (
     <div className="seat-map">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3 className="h6 mb-0 text-muted text-uppercase">Seat map</h3>
-        <button
-          type="button"
-          className="btn btn-sm btn-outline-secondary"
-          onClick={onRefresh}
-          disabled={refreshing}
-        >
-          <RefreshCw size={14} className={`me-1 ${refreshing ? 'spin' : ''}`} aria-hidden="true" />
-          {refreshing ? 'Refreshing…' : 'Refresh availability'}
-        </button>
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+          <h3 className="h6 mb-0 text-muted text-uppercase">Seat map</h3>
+          <span className="small text-muted">
+            Click to select or deselect (Maximum {maxSeats} seats)
+          </span>
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          {activeSeats.length > 0 && (
+            <span className="badge text-bg-primary">
+              {activeSeats.length} of {maxSeats} selected
+            </span>
+          )}
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary"
+            onClick={onRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw size={14} className={`me-1 ${refreshing ? 'spin' : ''}`} aria-hidden="true" />
+            {refreshing ? 'Refreshing…' : 'Refresh availability'}
+          </button>
+        </div>
       </div>
 
       <div className="seat-map-canvas">
@@ -49,7 +73,7 @@ export default function SeatMap({ seats, selectedSeat, onSelect, onRefresh, refr
 
           const renderSeat = (seat) => {
             const isBooked = seat.isAvailable === false
-            const isSelected = selectedSeat === seat.seatNumber
+            const isSelected = activeSeats.includes(seat.seatNumber)
 
             const classes = [
               'seat',
