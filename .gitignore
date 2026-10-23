@@ -480,3 +480,12 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Frontend environment files
+BusTicketBooking-Frontend/.env
+BusTicketBooking-Frontend/.env.*
+!BusTicketBooking-Frontend/.env.example
+
+# Frontend dependencies and build output
+BusTicketBooking-Frontend/node_modules/
+BusTicketBooking-Frontend/dist/
