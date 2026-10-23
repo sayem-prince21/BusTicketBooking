@@ -14,14 +14,17 @@ Usage:
   python api_test_suite.py
   API_BASE_URL=http://localhost:5290 python api_test_suite.py
   ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=... python api_test_suite.py
+  python api_test_suite.py authz      # only the cancellation authorization test
 
 Requires the API to be running (dotnet run --launch-profile http) and MySQL
 up. Set ADMIN_EMAIL and ADMIN_PASSWORD for the existing admin account.
-Uses only the Python standard library.
+The full suite uses only the Python standard library; the `authz` mode also
+needs `pymysql` for its read-only database verification.
 """
 
 import json
 import os
+import sys
 import threading
 import time
 import urllib.error
@@ -38,6 +41,19 @@ ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 PASSWORD = os.environ.get("TEST_PASSWORD", "TestUser@123")
 REPORT_FILE = os.environ.get("REPORT_FILE", "TEST_RESULTS.md")
+
+# --- Booking Cancellation authorization test (targeted, existing data) -----
+# This test never creates or modifies data: it logs in for a fresh Customer 1
+# token, picks an existing booking owned by Customer 2, attempts the
+# cross-customer DELETE, then proves via read-only SQL that nothing changed.
+# The stored JWTs in the .http files expire, so a fresh token is always used.
+AUTHZ_C1_EMAIL = os.environ.get("AUTHZ_C1_EMAIL", "new@gmail.com")
+AUTHZ_C1_PASSWORD = os.environ.get(
+    "AUTHZ_C1_PASSWORD", os.environ.get("TEST_PASSWORD", "TestUser@123"))
+AUTHZ_C2_EMAIL = os.environ.get("AUTHZ_C2_EMAIL", "customer2@example.com")
+# Force a specific booking; when empty, auto-select Customer 2's most recent
+# Confirmed booking that is not owned by Customer 1.
+AUTHZ_BOOKING_ID = os.environ.get("AUTHZ_BOOKING_ID", "")
 
 # Unique suffix so every run gets fresh users, phone numbers and buses.
 RUN = f"{int(time.time()) % 100000000:08d}"
@@ -181,6 +197,75 @@ def setup():
     tokens["depart_date"] = depart_at.strftime("%Y-%m-%d")
     print(f"  ready: bus {tokens['bus_id']}, customers {c1_email} / {c2_email}")
     return tokens
+
+
+# ---------------------------------------------------------------------------
+# Read-only MySQL helpers (Booking Cancellation authorization test)
+# ---------------------------------------------------------------------------
+
+# One read-only query that captures booking, ticket and seat state together, so
+# the authorization test can prove nothing changed after the failed DELETE.
+AUTHZ_SNAPSHOT_SQL = """
+    SELECT b.BookingId, b.UserId, u.Email AS OwnerEmail, b.Status AS BookingStatus,
+           b.SeatId, b.SeatNumber, s.IsAvailable AS SeatIsAvailable,
+           t.TicketId, t.Status AS TicketStatus, t.SeatAvailable AS TicketSeatAvailable
+    FROM Bookings b
+    LEFT JOIN AspNetUsers u ON u.Id = b.UserId
+    LEFT JOIN Seats s ON s.SeatId = b.SeatId
+    LEFT JOIN Tickets t ON t.BookingId = b.BookingId
+    WHERE b.BookingId = %s
+"""
+
+
+def db_connect():
+    """Open a MySQL connection for read-only verification.
+
+    Settings come from the BUS_TICKET_DB ODBC string, or fall back to
+    appsettings.json's DefaultConnection.  Returns None when pymysql is not
+    installed or MySQL cannot be reached, so callers can skip gracefully.
+    """
+    try:
+        import pymysql
+        import pymysql.cursors
+    except ImportError:
+        print("  pymysql not installed (pip install pymysql) - DB checks skipped")
+        return None
+
+    conn_str = os.environ.get("BUS_TICKET_DB")
+    if not conn_str:
+        try:
+            with open("appsettings.json", encoding="utf-8") as fh:
+                conn_str = json.load(fh)["ConnectionStrings"]["DefaultConnection"]
+        except Exception as exc:
+            print(f"  could not read appsettings.json DefaultConnection: {exc}")
+            return None
+
+    opts = {}
+    for chunk in conn_str.split(";"):
+        if "=" in chunk:
+            key, val = chunk.split("=", 1)
+            opts[key.strip().lower()] = val.strip()
+
+    try:
+        return pymysql.connect(
+            host=opts.get("server", "localhost"),
+            port=int(opts.get("port", "3306")),
+            user=opts.get("user", "root"),
+            password=opts.get("password", ""),
+            database=opts.get("database", "bus_ticket_booking"),
+            charset="utf8mb4",
+            cursorclass=pymysql.cursors.DictCursor,
+        )
+    except Exception as exc:
+        print(f"  MySQL connection failed: {exc}")
+        return None
+
+
+def db_fetch_one(conn, sql, params=()):
+    """Run one SELECT and return the first row as a dict (or None)."""
+    with conn.cursor() as cur:
+        cur.execute(sql, params)
+        return cur.fetchone()
 
 
 # ---------------------------------------------------------------------------
@@ -537,6 +622,120 @@ def test_tickets(t):
 
 
 # ---------------------------------------------------------------------------
+# Targeted test: Booking Cancellation authorization (cross-customer DELETE)
+# ---------------------------------------------------------------------------
+
+def test_cancellation_authorization():
+    """Customer 1 attempts to cancel Customer 2's existing booking.
+
+    Expects 404 Not Found and an unchanged database.  Uses an existing booking
+    and read-only SQL only -- no rows are created or updated.
+    """
+    s = "Cancellation Authz"
+    heading(f"{s} (DELETE /api/booking/{{id}} cross-customer)")
+
+    # 1) Fresh Customer 1 JWT (stored tokens in the .http files expire).
+    status, data = call("POST", "/api/auth/login",
+                        body={"email": AUTHZ_C1_EMAIL,
+                              "password": AUTHZ_C1_PASSWORD})
+    if not record(s, "Customer 1 logs in for a fresh JWT", status == 200,
+                  200, status, note="" if status == 200 else str(data)):
+        return
+    c1_token, c1_id = data["token"], data.get("userId")
+
+    conn = db_connect()
+    if conn is None:
+        record(s, "MySQL reachable for read-only verification",
+               False, "connected", "unavailable")
+        return
+
+    try:
+        # 2) Choose an existing booking owned by Customer 2, not Customer 1.
+        c2 = db_fetch_one(conn, "SELECT Id FROM AspNetUsers WHERE Email = %s",
+                          (AUTHZ_C2_EMAIL,))
+        if not record(s, f"Customer 2 account {AUTHZ_C2_EMAIL} exists",
+                      bool(c2), "found", "missing"):
+            return
+        c2_id = c2["Id"]
+        if not record(s, "Customer accounts are distinct",
+                      c2_id != c1_id, "different user IDs",
+                      "different" if c2_id != c1_id else "same"):
+            return
+
+        if AUTHZ_BOOKING_ID:
+            booking_id = AUTHZ_BOOKING_ID
+        else:
+            row = db_fetch_one(
+                conn,
+                "SELECT BookingId FROM Bookings "
+                "WHERE UserId = %s AND Status = 'Confirmed' "
+                "ORDER BY BookingDate DESC LIMIT 1",
+                (c2_id,))
+            booking_id = row["BookingId"] if row else None
+        if not record(s, "Existing Confirmed booking of Customer 2 found",
+                      bool(booking_id), "booking id",
+                      booking_id or "none"):
+            return
+
+        pre = db_fetch_one(conn, AUTHZ_SNAPSHOT_SQL, (booking_id,))
+        if not record(s, "Target booking row present (DB)", bool(pre),
+                      "row", "missing" if not pre else "found"):
+            return
+
+        owner_ok = pre["UserId"] == c2_id and pre["UserId"] != c1_id
+        record(s, "Booking owned by Customer 2, not Customer 1 (DB join)",
+               owner_ok, f"owner={AUTHZ_C2_EMAIL}", f"owner={pre['OwnerEmail']}")
+
+        # 3) Cross-customer DELETE using Customer 1's token.
+        status, body = call("DELETE", f"/api/booking/{booking_id}",
+                            token=c1_token)
+
+        # 4) Expect 404 Not Found.
+        record(s, "DELETE with Customer 1 token -> 404", status == 404,
+               404, status, note=str(body))
+
+        # 5) Read-only comparison of booking / ticket / seat state.
+        post = db_fetch_one(conn, AUTHZ_SNAPSHOT_SQL, (booking_id,))
+        record(s, "Booking status unchanged (DB)",
+               post["BookingStatus"] == pre["BookingStatus"],
+               pre["BookingStatus"], post["BookingStatus"])
+        record(s, "Seat availability unchanged (DB)",
+               post["SeatIsAvailable"] == pre["SeatIsAvailable"],
+               pre["SeatIsAvailable"], post["SeatIsAvailable"])
+        record(s, "Ticket status/seat flag unchanged (DB)",
+               (post["TicketStatus"], post["TicketSeatAvailable"])
+               == (pre["TicketStatus"], pre["TicketSeatAvailable"]),
+               (pre["TicketStatus"], pre["TicketSeatAvailable"]),
+               (post["TicketStatus"], post["TicketSeatAvailable"]))
+        record(s, "Full pre/post snapshot identical", post == pre,
+               "identical", "identical" if post == pre else "DIFFERENT")
+    finally:
+        conn.close()
+
+
+def run_authorization_only():
+    """Run only the cancellation authorization test and print a summary.
+
+    Deliberately does NOT write REPORT_FILE, so an existing TEST_RESULTS.md
+    from the full suite is left untouched.
+    """
+    print(f"Booking Cancellation authorization test - base {BASE}")
+    status, _ = call("GET", "/")
+    if status != 200:
+        print(f"API not reachable at {BASE} (GET / -> {status}).")
+        print("Start it with: dotnet run --launch-profile http")
+        return 2
+
+    test_cancellation_authorization()
+
+    passed = sum(1 for r in results if r["ok"])
+    failed = len(results) - passed
+    print(f"\n{'=' * 60}")
+    print(f"TOTAL: {passed}/{len(results)} passed, {failed} failed")
+    return 1 if failed else 0
+
+
+# ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 
@@ -609,4 +808,6 @@ def main():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("authz", "authorization"):
+        raise SystemExit(run_authorization_only())
     main()
