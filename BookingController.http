@@ -5,7 +5,6 @@
 @busId = 1636fc26-bb71-484f-87ac-06a82f043c79
 
 
-
 ### 5. Check all seats of the bus
 GET {{host}}/api/seat/bus/{{busId}}
 Accept: application/json
@@ -57,7 +56,8 @@ Authorization: Bearer {{token}}
 
 @host = http://localhost:5290
 @busId = 1636fc26-bb71-484f-87ac-06a82f043c79
-@customer1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjYxZWYyMDMyLWMzMGEtNDIyOC1iNzk5LWViNGNlMjhkOTgxNiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJuZXdAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoibmV3QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzkyNjA1Mjc0LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.imUb2tj9k63JGI0oM2TZCPWMKL9pBcpVOlRuaD__P_I
+
+@customer1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjYxZWYyMDMyLWMzMGEtNDIyOC1iNzk5LWViNGNlMjhkOTgxNiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJuZXdAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoibmV3QGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzkyNzMyMDU0LCJpc3MiOiJCdXNUaWNrZXRCb29raW5nIiwiYXVkIjoiQnVzVGlja2V0Qm9va2luZ0NsaWVudCJ9.8Iqu7L6L61bfirqKzwq4XgxIshBGX0gH3noPyetHjzI
 
 
 @customer2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6Ijg5ZjIyM2FlLTVjZjYtNDNlOC1hNzBlLWVmODk0NDBmMjdiNiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0dXNlcnByaW5jZUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImV4cCI6MTc5MjYwNDg4NywiaXNzIjoiQnVzVGlja2V0Qm9va2luZyIsImF1ZCI6IkJ1c1RpY2tldEJvb2tpbmdDbGllbnQifQ.CtOBCbYn35LhnHNlti4fRdSkrUvR6UDQUARCORRce-A
@@ -72,7 +72,7 @@ Content-Type: application/json
   "passengerPhone": "01712345678",
   "passengerEmail": "guest@example.com",
   "busId": "{{busId}}",
-  "seatNumber": "I1"
+  "seatNumber": "I3"
 }
 
 ### Guest booking with ticket creation
@@ -94,7 +94,7 @@ Content-Type: application/json
 {
   "passengerName": "New",
   "busId": "{{busId}}",
-  "seatNumber": "D1"
+  "seatNumber": "I4"
 }
 
 
@@ -120,7 +120,7 @@ Authorization: Bearer {{customer2Token}}
 Accept: application/json
 
 ### Customer 1 cancels own booking
-DELETE {{host}}/api/booking/d3014e04-6a1e-485e-8248-fd56cfb9dd56
+DELETE {{host}}/api/booking/e47e4a70-578c-4794-8506-4a2f3305ad95
 Authorization: Bearer {{customer1Token}}
 
 ### Customer 1 tries to cancel Customer 2 booking

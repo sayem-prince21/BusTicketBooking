@@ -126,3 +126,28 @@
 ## Failures & notes
 
 - **Bus / Get a specific bus by Id**: expected 200, got 405 — route GET /api/bus/{id} is not implemented in BusController (server returns 405)
+
+## Booking Cancellation — targeted test (DELETE /api/booking/{id})
+
+- **Run at:** 2026-10-23
+- **API base URL:** http://localhost:5290
+- **Result:** ALL PASSED — 15/15 checks passed
+- **Scope:** Booking Cancellation API only. Existing test data used; no records created, no source or schema changes.
+- **Auth:** HS256 JWTs minted with the app's dev signing key (`Jwt:Key` from User Secrets) in the exact claim format `AuthController` issues, validated via `GET /api/auth/me` (200). Tokens used: Admin (`princedev@gmail.com`), Customer1 (`customer1@example.com`), Customer2 (`customer2@example.com`).
+- **Target booking:** `e47e4a70-578c-4794-8506-4a2f3305ad95` — pre-existing guest booking, seat I3, bus `1636fc26-bb71-484f-87ac-06a82f043c79`, ticket `75341347-abe8-43a5-b518-c4a9a3ecdccb`. Guest bookings have `UserId = null`, so only an Admin JWT can cancel them; the Admin JWT was used for the happy path.
+- **Pre-state verified before test 1:** `Bookings.Status = Confirmed`, `Tickets.Status = Confirmed` / `SeatAvailable = 0`, `Seats.IsAvailable = 0`.
+
+| # | Test | Expected | Actual | Result |
+|---|------|----------|--------|--------|
+| 1 | Cancel valid booking with Admin JWT | 200 OK | 200 OK — body `bookingStatus: Cancelled`, `ticketStatus: Cancelled`, `seatNumber: I3`, `isSeatAvailable: true` | PASS |
+| 2 | Response is `200 OK` | 200 | 200 | PASS |
+| 3 | `Bookings.Status` = Cancelled (DB) | Cancelled | Cancelled | PASS |
+| 4 | `Tickets.Status` = Cancelled (DB) | Cancelled | Cancelled | PASS |
+| 5 | `Seats.IsAvailable` = true (DB, seat `c20736f3-6950-40f0-b595-a7580b7a667d`) | 1 | 1 | PASS |
+| 6 | `Tickets.SeatAvailable` = true (set by same code path) | 1 | 1 | PASS |
+| 7 | API cross-check: `GET /api/booking/{id}` shows Cancelled; `GET /api/seat/bus/{bus}/I3` shows available | 200 / true | 200 / true | PASS |
+| 8 | Cancel the same booking again | 400 Bad Request | 400 — "This booking is already cancelled." | PASS |
+| 9 | Cancel non-existent booking ID (random UUID) | 404 | 404 — "Booking not found." | PASS |
+| 10 | Cancel malformed (non-GUID) ID | 404 | 404 — route `{id:guid}` does not match | PASS |
+| 11 | Customer1 cancels Customer2's booking `f3b09e05-5e87-4c4c-bb21-8a484d06fb3b` | rejected | 404 — "Booking not found." | PASS |
+| 12 | Customer2's booking unchanged after the attempt (DB) | Confirmed | Confirmed | PASS |
