@@ -1,0 +1,33 @@
+/* Footer -------------------------------------------------- */
+.btb-footer {
+  background-color: #0c1b33;
+  color: #cbd5e1;
+}
+
+.btb-footer h2,
+.btb-footer .h6 {
+  color: #94a3b8;
+}
+
+.btb-footer-brand {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.footer-link {
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.footer-link:hover {
+  color: #fff;
+}
+
+.btb-footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  justify-content: space-between;
+}

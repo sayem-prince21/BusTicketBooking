@@ -1,0 +1,84 @@
+/* Navbar -------------------------------------------------- */
+.btb-navbar {
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+  z-index: 1030;
+}
+
+.btb-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 700;
+  font-size: 1.12rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.btb-brand:hover {
+  color: var(--brand-600);
+}
+
+.btb-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff;
+}
+
+.btb-brand-accent {
+  color: var(--brand-600);
+}
+
+.btb-toggler {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+  color: var(--ink);
+}
+
+.btb-navbar .nav-link {
+  color: #334155;
+  font-weight: 550;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+}
+
+.btb-navbar .nav-link:hover {
+  color: var(--brand-600);
+  background-color: var(--brand-50);
+}
+
+.btb-navbar .nav-link.active {
+  color: var(--brand-700);
+  background-color: var(--brand-100);
+}
+
+.btb-nav-user {
+  font-size: 0.88rem;
+  color: var(--muted);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btb-navbar .navbar-collapse {
+  padding-top: 0.65rem;
+}
+
+@media (min-width: 992px) {
+  .btb-navbar .navbar-collapse {
+    padding-top: 0;
+  }
+}
+
+/* Footer styles live in footer.css */

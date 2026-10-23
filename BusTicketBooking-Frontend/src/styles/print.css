@@ -1,0 +1,51 @@
+/* Print styles: applied when printing the ticket / confirmation pages ----- */
+@media print {
+  .btb-navbar,
+  .btb-footer,
+  .print-hidden,
+  .btn,
+  .modal-backdrop,
+  .navbar-toggler {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .app-shell {
+    min-height: auto;
+  }
+
+  .section,
+  .container {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .ticket-card {
+    border: 1px solid #333 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    page-break-inside: avoid;
+  }
+
+  .ticket-card .card-header {
+    background: #0b2f7a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .booking-summary,
+  .card {
+    box-shadow: none !important;
+  }
+
+  .summary-row {
+    border-bottom: 1px dotted #999 !important;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+}

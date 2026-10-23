@@ -1,0 +1,96 @@
+/* Seat map --------------------------------------------------------------- */
+.seat-map-canvas {
+  background: linear-gradient(180deg, var(--brand-50), #ffffff);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.seat-map-driver {
+  border: 1px dashed var(--brand-500);
+  border-radius: 999px;
+  width: 92px;
+  margin: 0 auto 0.75rem;
+  padding: 0.15rem 0;
+}
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+  min-width: 300px;
+}
+
+.seat-row-label {
+  width: 1.1rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.seat-row-group {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.seat-aisle {
+  width: 1.75rem;
+  flex-shrink: 0;
+}
+
+.seat {
+  flex: 1;
+  min-width: 54px;
+  max-width: 74px;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 10px 10px 6px 6px;
+  border: 1.5px solid transparent;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.seat-available {
+  background-color: #fff;
+  border-color: var(--brand-500);
+  color: var(--brand-700);
+  cursor: pointer;
+}
+
+.seat-available:hover {
+  background-color: var(--brand-100);
+  transform: translateY(-2px);
+}
+
+.seat-selected {
+  background-color: var(--brand-600);
+  border-color: var(--brand-700);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(26, 86, 214, 0.35);
+}
+
+.seat-booked {
+  background-color: #eceff3;
+  border-color: #d7dce3;
+  color: #98a2b3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.seat-demo {
+  display: inline-block;
+  width: 26px;
+  height: 22px;
+  min-width: 0;
+  padding: 0;
+  vertical-align: middle;
+  margin-right: 0.35rem;
+}
+
+.seat-legend li {
+  display: inline-flex;
+  align-items: center;
+}

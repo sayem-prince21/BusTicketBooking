@@ -1,0 +1,261 @@
+/* =========================================================
+   Design system + shared styles
+   Professional blue & white travel-booking palette.
+   ========================================================= */
+
+:root {
+  --brand-900: #0b2f7a;
+  --brand-700: #1149b8;
+  --brand-600: #1a56d6;
+  --brand-500: #2f6fed;
+  --brand-100: #e8f0fe;
+  --brand-50: #f3f7ff;
+
+  --ink: #0f172a;
+  --muted: #64748b;
+  --surface: #ffffff;
+  --page-bg: #f6f8fb;
+  --border: #e3e8ef;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.1);
+
+  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial,
+    sans-serif;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--page-bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--ink);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+code {
+  color: var(--brand-700);
+  background-color: var(--brand-50);
+  padding: 0.05rem 0.3rem;
+  border-radius: 6px;
+  font-size: 0.86em;
+}
+
+a {
+  color: var(--brand-600);
+}
+
+.app-shell {
+  overflow-x: hidden;
+}
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.section-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.border-y {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Cards ------------------------------------------------------------------ */
+.card {
+  border-radius: var(--radius);
+}
+
+.card-header {
+  border-bottom-color: var(--border);
+}
+
+/* Buttons ---------------------------------------------------------------- */
+.btb-btn-brand,
+.btb-btn-brand:disabled {
+  background-color: var(--brand-600);
+  border-color: var(--brand-600);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 999px;
+  padding-left: 1.35rem;
+  padding-right: 1.35rem;
+}
+
+.btb-btn-brand:hover,
+.btb-btn-brand:focus,
+.btb-btn-brand:disabled {
+  background-color: var(--brand-700);
+  border-color: var(--brand-700);
+  color: #fff;
+}
+
+.btb-btn-lg {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  font-size: 1.02rem;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+/* Forms ------------------------------------------------------------------ */
+.form-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+}
+
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border-color: var(--border);
+  padding: 0.55rem 0.8rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 0.2rem rgba(26, 86, 214, 0.18);
+}
+
+.input-group-text {
+  border-color: var(--border);
+  background-color: #fff;
+  color: var(--brand-600);
+  border-radius: 8px;
+}
+
+/* Shared state blocks ---------------------------------------------------- */
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.75rem 1rem;
+  text-align: center;
+}
+
+/* Summary card ----------------------------------------------------------- */
+.booking-summary {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.summary-row:last-child {
+  border-bottom: 0;
+}
+
+.summary-row dt {
+  color: var(--muted);
+  font-weight: 500;
+  margin: 0;
+}
+
+.summary-row dd {
+  margin: 0;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.summary-total .h4 {
+  letter-spacing: -0.02em;
+}
+
+/* Ticket ----------------------------------------------------------------- */
+.ticket-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.ticket-value {
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.ticket-card {
+  border: 1px solid var(--border);
+}
+
+/* Misc utilities --------------------------------------------------------- */
+.sticky-lg-side {
+  position: static;
+}
+
+@media (min-width: 992px) {
+  .sticky-lg-side {
+    position: sticky;
+    top: 92px;
+  }
+}
+
+.spin {
+  animation: btb-spin 1s linear infinite;
+}
+
+@keyframes btb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

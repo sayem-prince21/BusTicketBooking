@@ -1,0 +1,27 @@
+/* Booking + confirmation + ticket ---------------------------------------- */
+.booking-summary .card-header {
+  border-bottom-color: var(--border);
+}
+
+.ticket-card {
+  border: 1px solid var(--border);
+}
+
+.ticket-card .card-header {
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-500));
+}
+
+.ticket-card .booking-summary {
+  border: 0;
+  box-shadow: none;
+}
+
+.ticket-card .booking-summary .card-header {
+  background: transparent;
+  padding: 0;
+  border: 0;
+}
+
+.alert {
+  border-radius: var(--radius-sm);
+}

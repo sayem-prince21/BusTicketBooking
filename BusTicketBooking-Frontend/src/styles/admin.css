@@ -1,0 +1,89 @@
+/* Admin area ------------------------------------------------------------- */
+.admin-shell {
+  min-height: 60vh;
+}
+
+.admin-sidebar {
+  background: linear-gradient(165deg, var(--brand-900), var(--brand-700));
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-nav-link {
+  color: #cbd5e1;
+  font-size: 0.94rem;
+  font-weight: 550;
+}
+
+.admin-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.admin-nav-link.active {
+  background-color: #fff;
+  color: var(--brand-700);
+}
+
+.admin-nav-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.admin-page {
+  min-height: 420px;
+}
+
+.admin-stat {
+  border-radius: var(--radius);
+  color: inherit;
+}
+
+.admin-stat:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.admin-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.admin-stat-primary {
+  background-color: #e8f0fe;
+  color: var(--brand-600);
+}
+
+.admin-stat-info {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.admin-stat-secondary {
+  background-color: #eef2f7;
+  color: #475569;
+}
+
+.admin-stat-success {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.admin-stat-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    display: none;
+  }
+
+  .admin-sidebar.admin-sidebar-open {
+    display: block;
+  }
+}

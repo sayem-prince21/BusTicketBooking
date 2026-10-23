@@ -1,0 +1,76 @@
+/* Home: hero, search card, routes, features ------------------------------ */
+.home-hero {
+  background:
+    radial-gradient(900px 380px at 12% -10%, rgba(255, 255, 255, 0.18), transparent 60%),
+    linear-gradient(135deg, var(--brand-900) 0%, var(--brand-600) 55%, var(--brand-500) 100%);
+  color: #fff;
+}
+
+.home-hero h1 {
+  color: #fff;
+}
+
+.search-card {
+  border-radius: 18px;
+}
+
+.search-form .form-control {
+  min-height: 46px;
+}
+
+.btb-swap-btn {
+  position: absolute;
+  right: 0.35rem;
+  top: -0.35rem;
+  z-index: 5;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  line-height: 1;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.95rem;
+}
+
+.btb-swap-btn:hover {
+  background: var(--brand-50);
+  color: var(--brand-700);
+}
+
+@media (max-width: 767.98px) {
+  .btb-swap-btn {
+    display: none;
+  }
+}
+
+.route-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.route-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--brand-500);
+}
+
+.feature-card {
+  border-radius: var(--radius);
+}
+
+.feature-icon,
+.benefit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-color: var(--brand-100);
+  color: var(--brand-600);
+}
+
+.benefit-icon {
+  background-color: var(--brand-600);
+  color: #fff;
+}

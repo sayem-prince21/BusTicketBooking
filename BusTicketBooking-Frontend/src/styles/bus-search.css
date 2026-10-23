@@ -1,0 +1,32 @@
+/* Search results --------------------------------------------------------- */
+.search-summary-card {
+  border-radius: var(--radius);
+}
+
+.search-summary-card .h4 {
+  font-weight: 700;
+}
+
+.bus-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.bus-card:hover {
+  border-color: var(--brand-500);
+  box-shadow: var(--shadow-md);
+}
+
+.bus-card-route {
+  background-color: var(--brand-50);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
+}
+
+.bus-route-line {
+  position: relative;
+  border-top: 2px dashed var(--brand-500);
+  color: var(--brand-600);
+  padding-top: 0.35rem;
+}
