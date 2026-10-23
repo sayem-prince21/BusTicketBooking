@@ -225,6 +225,10 @@ namespace BusTicketBooking.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<decimal>("TicketPrice")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");

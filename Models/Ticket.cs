@@ -23,6 +23,8 @@ namespace BusTicketBooking.Models
         public Guid BookingId { get; set; }
 
         public Booking? Booking { get; set; }
+
+        public string Status { get; set; } = "Confirmed";
     }
 }
 

@@ -297,7 +297,6 @@ namespace BusTicketBooking.Controllers
                 return Unauthorized("User ID not found in token.");
             }
 
-            // Find the booking before opening a transaction.
             var booking = await _context.Bookings
                 .FirstOrDefaultAsync(b => b.BookingId == id);
 
@@ -317,7 +316,6 @@ namespace BusTicketBooking.Controllers
 
             try
             {
-                // Recheck the seat inside the transaction.
                 var seat = await _context.Seats
                     .FirstOrDefaultAsync(s => s.SeatId == booking.SeatId);
 
@@ -327,7 +325,19 @@ namespace BusTicketBooking.Controllers
                     return NotFound("Seat not found.");
                 }
 
+                var ticket = await _context.Tickets
+                    .FirstOrDefaultAsync(t => t.BookingId == booking.BookingId);
+
+                if (ticket == null)
+                {
+                    await transaction.RollbackAsync();
+                    return NotFound("Ticket not found for this booking.");
+                }
+
+                // Update booking, ticket, and seat together.
                 booking.Status = "Cancelled";
+                ticket.Status = "Cancelled";
+                ticket.SeatAvailable = true;
                 seat.IsAvailable = true;
 
                 await _context.SaveChangesAsync();
@@ -337,8 +347,10 @@ namespace BusTicketBooking.Controllers
                 {
                     Message = "Booking cancelled successfully.",
                     BookingId = booking.BookingId,
-                    SeatNumber = seat.SeatNumber,
+                    TicketId = ticket.TicketId,
                     BookingStatus = booking.Status,
+                    TicketStatus = ticket.Status,
+                    SeatNumber = seat.SeatNumber,
                     IsSeatAvailable = seat.IsAvailable
                 });
             }
